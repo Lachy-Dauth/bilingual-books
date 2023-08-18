@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bilingual Book Generator</title>
+  <style>
+    * {
+      margin: 0px;
+      padding: 0px;
+      box-sizing: border-box;
+    }
+    body {
+      color: rgb(53, 39, 0);
+      background-color: rgb(255, 234, 203);
+      font-family: Arial, sans-serif;
+    }
+    .paragraph {
+      display: flex;
+      margin-bottom: 10px;
+    }
+    .source,
+    .english {
+      flex: 1;
+    }
+    .source {
+      margin-right: 5px;
+    }
+    .english {
+      margin-left: 5px;
+    }
+    textarea {
+      width: 100%;
+    }
+    #source-text {
+      height: 200px;
+    }
+    #output {
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    #info {
+      color: rgb(255, 246, 234);
+      position: absolute;
+      width: 90vw;
+      margin-top: 5vh;
+      margin-bottom: 5vh;
+      padding: 20px;
+      border-radius: 10px;
+      height: 90vh;
+      margin-right: 5vw;
+      margin-left: 5vw;
+      background-color: #b5722ac7;
+      box-shadow: 3px 3px 5px 2px #b08a2134;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .hide {
+      display: none !important;
+    }
+
+    .fa-solid {
+      font-size: 2rem;
+    }
+
+    #info > p {
+      margin-bottom: 0.8rem;
+    }
+
+    .del {
+      padding: 20px;
+    }
+
+  </style>
+  <script src="https://kit.fontawesome.com/ed98a6bd6b.js" crossorigin="anonymous"></script>
+  <script>
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    function toggleInfo() {
+      const infoElement = document.querySelector("#info");
+      infoElement.classList.toggle("hide");
+    }
+    async function generateBilingualBook() {
+      var sourceText = document.getElementById('source-text').value;
+
+      var bookContainer = document.getElementById('output');
+      bookContainer.innerHTML = '';
+
+      var paragraphs = sourceText.replaceAll("\n", " ").replaceAll(".", ".\n").split("\n");
+
+      var sourceLang = document.getElementById('sl').value;
+      var targetLang = document.getElementById('tl').value;
+
+      for (var i = 0; i < paragraphs.length; i++) {
+        await sleep(3);
+        var paragraph = document.createElement('div');
+        paragraph.className = 'paragraph';
+
+        var sourcePara = document.createElement('div');
+        sourcePara.className = 'source';
+        sourcePara.textContent = paragraphs[i];
+
+        var englishPara = document.createElement('div');
+        englishPara.className = 'english';
+
+        paragraph.appendChild(sourcePara);
+        paragraph.appendChild(englishPara);
+
+        bookContainer.appendChild(paragraph);
+
+        translateParagraph(paragraphs[i], englishPara, sourceLang, targetLang);
+      }
+      const elementToDelete = document.querySelector('.del');
+      if (elementToDelete) {
+        elementToDelete.remove();
+      }
+    }
+
+    function translateParagraph(sourceText, targetElement, sourceLang, targetLang) {
+      var url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=' + sourceLang + '&tl=' + targetLang + '&dt=t&q=' + encodeURI(sourceText);
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          data.splice(data.length - 7, 7)
+          data = data[0]
+          var translatedText = data.map(item => item[0]).join(" ");
+          targetElement.textContent = translatedText;
+        })
+        .catch(error => console.log('Translation error:', error));
+    }
+
+    function copy() {
+      // Get the text field
+      var text = ".Harry Potter à L'École des Sorciers.. Chapitre 1 - Le survivant.. Mr et Mrs Dursley, qui habitaient au 4, Privet Drive, avaient toujours affirmé avec la plus grande fierté qu'ils étaient parfaitement normaux, merci pour eux. Jamais quiconque n'aurait imaginé qu'ils puissent se trouver impliqués dans quoi que ce soit d'étrange ou de mystérieux. Ils n'avaient pas de temps à perdre avec des sornettes. Mr Dursley dirigeait la Grunnings, une entreprise qui fabriquait des perceuses. C'était un homme grand et massif, qui n'avait pratiquement pas de cou, mais possédait en revanche une moustache de belle taille. Mrs Dursley, quant à elle, était mince et blonde et disposait d'un cou deux fois plus long que la moyenne, ce qui lui était fort utile pour espionner ses voisins en regardant par-dessus les clôtures des jardins. Les Dursley avaient un petit garçon prénommé Dudley et c'était à leurs yeux le plus bel enfant du monde. Les Dursley avaient tout ce qu'ils voulaient. La seule chose indésirable qu'ils possédaient, c'était un secret dont ils craignaient plus que tout qu'on le découvre un jour. Si jamais quiconque venait à entendre parler des Potter, ils étaient convaincus qu'ils ne s'en remettraient pas. Mrs Potter était la sœur de Mrs Dursley, mais toutes deux ne s'étaient plus revues depuis des années. En fait, Mrs Dursley faisait comme si elle était fille unique, car sa sœur et son bon à rien de mari étaient aussi éloignés que possible de tout ce qui faisait un Dursley. Les Dursley tremblaient d'épouvante à la pensée de ce que diraient les voisins si par malheur les Potter se montraient dans leur rue. Ils savaient que les Potter, eux aussi, avaient un petit garçon, mais ils ne l'avaient jamais vu. Son existence constituait une raison supplémentaire de tenir les Potter à distance : il n'était pas question que le petit Dudley se mette à fréquenter un enfant comme celui-là.";
+
+      // Copy the text inside the text field
+      navigator.clipboard.writeText(text);
+    }
+  </script>
+</head>
+<body>
+  <div id="info" class="">
+    <header><h2>Information</h2><i class="fa-solid fa-circle-xmark" onclick="toggleInfo();" style="font-size: 1.5rem;"></i></header>
+    <br>
+    <h2>Step 1: Find the source text</h2>
+    <p>The program will break each line by full stops rather than paragraphs or other punctionation so keep that in mind. Click <u onClick="copy()">here</u> for the first page of Harry Potter to show how to formated correctly and to demonstrate the generator</p>
+    
+    <h2>Step 2: Select Source and Target Languages</h2>
+    <p>Find the text areas labeled "Enter the code of your source language" and "Enter the code of your target language." In the first text area, enter the language code of the source language (e.g., "fr" for French). In the second text area, enter the language code of the target language (e.g., "en" for English).</p>
+    
+    <h2>Step 3: Input Source Text</h2>
+    <p>Below the language code text areas, there is a text area labeled "Enter source text." Type or paste the source text you want to translate and generate a bilingual book from.</p>
+    
+    <h2>Step 4: Generate Bilingual Book</h2>
+    <p>Click the "Generate Book" button to start the translation and book generation process.</p>
+    
+    <h2>Step 5: Wait for Translation</h2>
+    <p>The application will begin translating the source text paragraph by paragraph into the target language. Each paragraph will display the original source text on the left and the translated text on the right.</p>
+    
+    <h2>Step 6: View Bilingual Book</h2>
+    <p>As the application processes the paragraphs, a bilingual book will be generated on the screen. The left side of each paragraph will show the source text in the source language, and the right side will display the translated text in the target language.</p>
+    
+    <h2>Step 7: Save as PDF</h2>
+    <ul>
+    <p>Once the bilingual book is fully generated and displayed on the screen, press <kbd>Ctrl + P</kbd> (Windows) or <kbd>Command + P</kbd> (Mac) to open the print dialog.</p>
+    <p>In the print dialog, select the printer as "Save as PDF" or a similar option.</p>
+    <p>Adjust any print settings you desire, such as page orientation, margins, and more. I suggest setting margins to 0</p>
+    <p>Click the "Save" or "Print" button to save the bilingual book as a PDF file on your computer.</p>
+    <br>
+    <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="lachydauth" data-color="#FFDD00" data-emoji=""  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>
+  </div>
+  <div class="del">
+    <header>
+      <h1>Bilingual Book Generator</h1>
+      <i class="fa-solid fa-circle-question" id="info-button" onclick="toggleInfo()"></i>
+    </header>
+    <textarea id="sl" placeholder="Enter the code of your source language eg fr..."></textarea>
+    <textarea id="tl" placeholder="Enter the code of your target language eg en..."></textarea>
+    <h3>Enter source text:</h3>
+    <textarea id="source-text" placeholder="Enter your source text here..."></textarea>
+    <button onclick="generateBilingualBook()">Generate Book</button>
+  </div>
+  <div id="output"></div>
+</body>
+</html>
