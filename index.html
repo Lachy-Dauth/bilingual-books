@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
   <title>Bilingual Book Generator</title>
   <style>
     * {
@@ -11,6 +12,11 @@
     body {
       color: rgb(53, 39, 0);
       background-color: rgb(255, 234, 203);
+      font-family: Arial, sans-serif;
+    }
+    .bw {
+      color: rgb(0, 0, 0);
+      background-color: rgb(255, 255, 255);
       font-family: Arial, sans-serif;
     }
     .paragraph {
@@ -51,6 +57,10 @@
       margin-left: 5vw;
       background-color: #b5722ac7;
       box-shadow: 3px 3px 5px 2px #b08a2134;
+    }
+
+    .rtl {
+      text-align: right;
     }
 
     header {
@@ -126,6 +136,14 @@
         var englishPara = document.createElement('div');
         englishPara.className = 'english';
 
+        if (['ar', 'he', 'fa', 'ur', 'ks', 'ps', 'ug', 'ckb', 'pa', 'sd'].includes(targetLang)) {
+          englishPara.className += " rtl";
+        }
+
+        if (['ar', 'he', 'fa', 'ur', 'ks', 'ps', 'ug', 'ckb', 'pa', 'sd'].includes(courceLang)) {
+          sourcePara.className += " rtl";
+        }
+
         paragraph.appendChild(sourcePara);
         paragraph.appendChild(englishPara);
 
@@ -137,6 +155,11 @@
       if (elementToDelete) {
         elementToDelete.remove();
       }
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      body.classList.toggle('bw');
     }
 
     function translateParagraph(sourceText, targetElement, sourceLang, targetLang) {
@@ -205,7 +228,7 @@
     <textarea id="tl" placeholder="Enter the code of your target language eg en..."></textarea>
     <h3>Enter source text:</h3>
     <textarea id="source-text" placeholder="Enter your source text here..."></textarea>
-    <button onclick="generateBilingualBook()">Generate Book</button>
+    <button onclick="generateBilingualBook()">Generate Book</button> <button onclick="toggleTheme()">Toggle Theme</button>
   </div>
   <div id="output"></div>
 </body>
