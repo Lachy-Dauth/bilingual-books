@@ -84,7 +84,7 @@
       padding: 20px;
     }
 
-    a {
+    p > a {
       color: rgb(255, 240, 222);
       text-decoration: underline;
     }
@@ -140,7 +140,7 @@
           englishPara.className += " rtl";
         }
 
-        if (['ar', 'he', 'fa', 'ur', 'ks', 'ps', 'ug', 'ckb', 'pa', 'sd'].includes(courceLang)) {
+        if (['ar', 'he', 'fa', 'ur', 'ks', 'ps', 'ug', 'ckb', 'pa', 'sd'].includes(sourceLang)) {
           sourcePara.className += " rtl";
         }
 
@@ -155,6 +155,29 @@
       if (elementToDelete) {
         elementToDelete.remove();
       }
+      const infoElement = document.querySelector('#info');
+      if (infoElement) {
+        infoElement.remove();
+      }
+
+      // Create a new EPUB
+      const epub = new JSZip();
+
+      // Get the HTML content of the current webpage
+
+      const body = document.body;
+      let needToggle = false;
+      if (body.classList != "bw") {
+        needToggle = true;
+      }
+      await sleep(30000);
+      body.classList.add("bw")
+      let htmlContent = document.documentElement.outerHTML;
+      if (needToggle) {
+        body.classList.toggle("bw")
+      }
+      
+      console.log(htmlContent);
     }
 
     function toggleTheme() {
