@@ -107,7 +107,7 @@ async function generateBilingualBook() {
 
     translateParagraph(paragraphs[i], englishPara, sourceLang, targetLang);
   }
-  const elementToDelete = document.querySelector('.del');
+  const elementToDelete = document.querySelector('.container');
   if (elementToDelete) {
     elementToDelete.remove();
   }
@@ -120,8 +120,9 @@ async function generateBilingualBook() {
   text = document.body.innerHTML.replaceAll("&nbsp;", "");
   
   let button = document.createElement('button');
+  button.className = 'btn btn-primary download-btn';
   button.addEventListener('click', makeBook);
-  button.innerText = "Download Epub";
+  button.innerText = "📚 Download Epub";
   document.body.prepend(button);
 }
 

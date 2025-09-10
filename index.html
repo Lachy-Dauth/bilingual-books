@@ -5,97 +5,351 @@
   <title>Bilingual Book Generator</title>
   <style>
     * {
-      margin: 0px;
-      padding: 0px;
+      margin: 0;
+      padding: 0;
       box-sizing: border-box;
     }
-    body {
-      color: rgb(53, 39, 0);
-      background-color: rgb(255, 234, 203);
-      font-family: Arial, sans-serif;
-    }
-    .bw {
-      color: rgb(0, 0, 0);
-      background-color: rgb(255, 255, 255);
-      font-family: Arial, sans-serif;
-    }
-    .paragraph {
-      display: flex;
-      margin-bottom: 10px;
-    }
-    .source,
-    .english {
-      flex: 1;
-    }
-    .source {
-      margin-right: 5px;
-    }
-    .english {
-      margin-left: 5px;
-    }
-    textarea {
-      width: 100%;
-    }
-    #source-text {
-      height: 200px;
-    }
-    #output {
-      padding: 20px;
-      margin-top: 20px;
+
+    :root {
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      --secondary-color: #f8fafc;
+      --text-color: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --error-color: #dc2626;
+      --success-color: #059669;
+      --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --radius: 8px;
+      --radius-lg: 12px;
     }
 
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: var(--text-color);
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      min-height: 100vh;
+    }
+
+    .bw {
+      background: #ffffff;
+      color: #000000;
+    }
+
+    .bw * {
+      background: #ffffff !important;
+      color: #000000 !important;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Header */
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3rem;
+      padding: 1.5rem 0;
+    }
+
+    .main-header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin: 0;
+    }
+
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      transition: all 0.2s ease;
+      background: white;
+    }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    #source-text {
+      min-height: 200px;
+    }
+
+    /* Button Styles */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--text-color);
+      border: 2px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    /* Icon Button */
+    .icon-button {
+      font-size: 1.2rem;
+      font-weight: bold;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      transition: all 0.2s ease;
+      color: inherit;
+      min-width: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.05);
+    }
+
+    /* Modal/Info Panel */
     #info {
-      color: rgb(255, 246, 234);
-      position: absolute;
-      width: 90vw;
-      margin-top: 5vh;
-      margin-bottom: 5vh;
-      padding: 20px;
-      border-radius: 10px;
-      height: 90vh;
-      margin-right: 5vw;
-      margin-left: 5vw;
-      background-color: #b5722ac7;
-      box-shadow: 3px 3px 5px 2px #b08a2134;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .info-content {
+      background: white;
+      border-radius: var(--radius-lg);
+      max-width: 800px;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 2rem;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+
+    .info-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .info-header h2 {
+      color: var(--primary-color);
+      font-size: 1.5rem;
+      margin: 0;
+    }
+
+    .info-content h2 {
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+      margin-top: 1.5rem;
+      font-size: 1.25rem;
+    }
+
+    .info-content h2:first-of-type {
+      margin-top: 0;
+    }
+
+    .info-content p {
+      margin-bottom: 1rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .info-content ul {
+      margin-left: 1rem;
+    }
+
+    .info-content a {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .info-content a:hover {
+      text-decoration: underline;
+    }
+
+    .info-content kbd {
+      background: var(--secondary-color);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      border: 1px solid var(--border-color);
+    }
+
+    /* Output Styles */
+    #output {
+      margin-top: 3rem;
+    }
+
+    .paragraph {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .source, .english {
+      line-height: 1.7;
+    }
+
+    .source {
+      font-weight: 500;
+    }
+
+    .english {
+      color: var(--text-muted);
     }
 
     .rtl {
+      direction: rtl;
       text-align: right;
     }
 
-    header {
-      display: flex;
-      justify-content: space-between;
-    }
-
+    /* Utilities */
     .hide {
       display: none !important;
     }
 
-    .fa-solid {
-      font-size: 2rem;
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+
+      .main-header h1 {
+        font-size: 2rem;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .btn-group {
+        flex-direction: column;
+      }
+
+      .paragraph {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .info-content {
+        margin: 1rem;
+        padding: 1.5rem;
+      }
+
+      #info {
+        padding: 1rem;
+      }
     }
 
-    #info > p {
-      margin-bottom: 0.8rem;
-    }
-
-    .del {
-      padding: 20px;
-    }
-
-    p > a {
-      color: rgb(255, 240, 222);
+    /* Copy button styling */
+    .copy-link {
+      color: var(--primary-color);
       text-decoration: underline;
+      cursor: pointer;
+      font-weight: 500;
     }
 
-    /* Remove underline on hover */
-    a:hover {
-      text-decoration: none;
+    .copy-link:hover {
+      color: var(--primary-hover);
     }
 
+    /* Enhanced download button */
+    .download-btn {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      z-index: 100;
+    }
   </style>
-  <script src="https://kit.fontawesome.com/ed98a6bd6b.js" crossorigin="anonymous"></script>
+
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-HP6ZDS0E04"></script>
   <script>
@@ -111,52 +365,78 @@
 </head>
 <body>
   <div id="info" class="">
-    <header><h2>Information</h2><i class="fa-solid fa-circle-xmark" onclick="toggleInfo();" style="font-size: 1.5rem;"></i></header>
-    <br>
-    <h2>Step 1: Find the source text</h2>
-    <p>The program will break each line by full stops rather than paragraphs or other punctionation so keep that in mind. Click <u onClick="copy()">here</u> to copy the first page of Harry Potter to show how to formated correctly and to demonstrate the generator</p>
-    
-    <h2>Step 2: Select Source and Target Languages</h2>
-    <p>Find the text areas labeled "Enter the code of your source language" and "Enter the code of your target language." In the first text area, enter the language code of the source language (e.g., "fr" for French). In the second text area, enter the language code of the target language (e.g., "en" for English).</p>
-    
-    <h2>Step 3: Input Source Text</h2>
-    <p>Below the language code text areas, there is a text area labeled "Enter source text." Type or paste the source text you want to translate and generate a bilingual book from.</p>
-    
-    <h2>Step 4: Generate Bilingual Book</h2>
-    <p>Click the "Generate Book" button to start the translation and book generation process.</p>
-    
-    <h2>Step 5: Wait for Translation</h2>
-    <p>The application will begin translating the source text paragraph by paragraph into the target language. Each paragraph will display the original source text on the left and the translated text on the right.</p>
-    
-    <h2>Step 6: View Bilingual Book</h2>
-    <p>As the application processes the paragraphs, a bilingual book will be generated on the screen. The left side of each paragraph will show the source text in the source language, and the right side will display the translated text in the target language.</p>
-        
-    <h2>Step 7: Download the Epub</h2>
-    <p>There will be a button to download the Epub that will appear 5 seconds after the book is done generating</p>
-    
-    <h2>Step 8: Save as PDF</h2>
-    <ul>
-    <p>Once the bilingual book is fully generated and displayed on the screen, press <kbd>Ctrl + P</kbd> (Windows) or <kbd>Command + P</kbd> (Mac) to open the print dialog.</p>
-    <p>In the print dialog, select the printer as "Save as PDF" or a similar option.</p>
-    <p>Adjust any print settings you desire, such as page orientation, margins, and more. I suggest setting margins to 0</p>
-    <p>Click the "Save" or "Print" button to save the bilingual book as a PDF file on your computer.</p>
-    <br>
-    <p>Click <a href="./animal-farm-en-fr.html">here</a> for an example of a finish book.</p>
-    <p> And click <a href="./animal-farm-en-fr.pdf">here</a> for an example of a finished book in pdf form.</p>
-    <br>
-    <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="lachydauth" data-color="#FFDD00" data-emoji=""  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>
+    <div class="info-content">
+      <div class="info-header">
+        <h2>Information</h2>
+        <button class="icon-button" onclick="toggleInfo();">×</button>
+      </div>
+      
+      <h2>Step 1: Find the source text</h2>
+      <p>The program will break each line by full stops rather than paragraphs or other punctuation so keep that in mind. Click <span class="copy-link" onClick="copy()">here</span> to copy the first page of Harry Potter to show how to format correctly and to demonstrate the generator</p>
+      
+      <h2>Step 2: Select Source and Target Languages</h2>
+      <p>Find the text areas labeled "Enter the code of your source language" and "Enter the code of your target language." In the first text area, enter the language code of the source language (e.g., "fr" for French). In the second text area, enter the language code of the target language (e.g., "en" for English).</p>
+      
+      <h2>Step 3: Input Source Text</h2>
+      <p>Below the language code text areas, there is a text area labeled "Enter source text." Type or paste the source text you want to translate and generate a bilingual book from.</p>
+      
+      <h2>Step 4: Generate Bilingual Book</h2>
+      <p>Click the "Generate Book" button to start the translation and book generation process.</p>
+      
+      <h2>Step 5: Wait for Translation</h2>
+      <p>The application will begin translating the source text paragraph by paragraph into the target language. Each paragraph will display the original source text on the left and the translated text on the right.</p>
+      
+      <h2>Step 6: View Bilingual Book</h2>
+      <p>As the application processes the paragraphs, a bilingual book will be generated on the screen. The left side of each paragraph will show the source text in the source language, and the right side will display the translated text in the target language.</p>
+          
+      <h2>Step 7: Download the Epub</h2>
+      <p>There will be a button to download the Epub that will appear 5 seconds after the book is done generating</p>
+      
+      <h2>Step 8: Save as PDF</h2>
+      <p>Once the bilingual book is fully generated and displayed on the screen, press <kbd>Ctrl + P</kbd> (Windows) or <kbd>Command + P</kbd> (Mac) to open the print dialog.</p>
+      <p>In the print dialog, select the printer as "Save as PDF" or a similar option.</p>
+      <p>Adjust any print settings you desire, such as page orientation, margins, and more. I suggest setting margins to 0</p>
+      <p>Click the "Save" or "Print" button to save the bilingual book as a PDF file on your computer.</p>
+      
+      <p>Click <a href="./animal-farm-en-fr.html">here</a> for an example of a finished book.</p>
+      <p>And click <a href="./animal-farm-en-fr.pdf">here</a> for an example of a finished book in PDF form.</p>
+      
+      <div style="margin-top: 2rem;">
+        <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="lachydauth" data-color="#FFDD00" data-emoji=""  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>
+      </div>
+    </div>
   </div>
-  <div class="del">
-    <header>
+
+  <div class="container">
+    <header class="main-header">
       <h1>Bilingual Book Generator</h1>
-      <i class="fa-solid fa-circle-question" id="info-button" onclick="toggleInfo()"></i>
+      <button class="icon-button" id="info-button" onclick="toggleInfo()">?</button>
     </header>
-    <textarea id="sl" placeholder="Enter the code of your source language eg fr..."></textarea>
-    <textarea id="tl" placeholder="Enter the code of your target language eg en..."></textarea>
-    <h3>Enter source text:</h3>
-    <textarea id="source-text" placeholder="Enter your source text here..."></textarea>
-    <button onclick="generateBilingualBook()">Generate Book</button> <button onclick="toggleTheme()">Toggle Theme</button>
+
+    <div class="form-section">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="sl">Source Language Code</label>
+          <input type="text" id="sl" placeholder="e.g., fr for French">
+        </div>
+        <div class="form-group">
+          <label for="tl">Target Language Code</label>
+          <input type="text" id="tl" placeholder="e.g., en for English">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="source-text">Source Text</label>
+        <textarea id="source-text" placeholder="Enter your source text here..."></textarea>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="generateBilingualBook()">Generate Book</button>
+        <button class="btn btn-secondary" onclick="toggleTheme()">Toggle Theme</button>
+      </div>
+    </div>
   </div>
+
   <div id="output"></div>
 </body>
 </html>
