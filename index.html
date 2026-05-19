@@ -284,8 +284,179 @@
       padding: 10px 20px;
     }
 
+    .paragraph.is-heading .source,
+    .paragraph.is-heading .english {
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+
     .source, .english {
       flex: 1;
+    }
+
+    .chapter {
+      margin: 24px 0;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .chapter:first-child {
+      border-top: none;
+    }
+
+    .chapter-title-display {
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 8px 20px 16px;
+      margin: 0;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin: 0 0 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      background: transparent;
+      color: var(--muted);
+      border: none;
+      border-radius: 0;
+      padding: 10px 16px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+
+    .tab-btn:hover {
+      background: transparent;
+      color: var(--accent);
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(140, 82, 20, 0.18);
+      border-radius: 4px;
+    }
+
+    .tab-panel.hide {
+      display: none !important;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      font: inherit;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 14px 12px;
+      cursor: pointer;
+      margin-bottom: 14px;
+    }
+
+    input[type="file"]:hover {
+      border-color: var(--accent);
+    }
+
+    #epub-status {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin: 0 0 12px;
+    }
+
+    #epub-status.error {
+      color: #b22;
+    }
+
+    #epub-info {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      font-size: 0.9rem;
+    }
+
+    #epub-info .info-row {
+      display: flex;
+      gap: 12px;
+      padding: 3px 0;
+    }
+
+    #epub-info .info-key {
+      flex: 0 0 160px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    #epub-info .info-val {
+      flex: 1;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .epub-progress {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .epub-progress .progress-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .epub-progress .progress-row > span:first-child {
+      flex: 1;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .epub-progress #epub-cancel-btn {
+      padding: 4px 12px;
+      font-size: 0.85rem;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 6px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.2s ease;
     }
 
     @media (max-width: 600px) {
@@ -294,6 +465,8 @@
       .lang-row { flex-direction: column; gap: 10px; }
       .paragraph { flex-direction: column; gap: 6px; }
       #info { padding: 18px; }
+      #epub-info .info-row { flex-direction: column; gap: 0; }
+      #epub-info .info-key { flex-basis: auto; }
     }
   </style>
   <!-- Google tag (gtag.js) -->
@@ -308,6 +481,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="main.js" defer></script>
+  <script src="epub-converter.js" defer></script>
 </head>
 <body>
   <div id="info">
@@ -353,23 +527,55 @@
       <h1>Bilingual Book Generator</h1>
       <svg class="icon" id="info-button" onclick="toggleInfo()" viewBox="0 0 512 512" aria-hidden="true"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM169.8 165.3c7.9-22.3 29.1-37.3 52.8-37.3h58.3c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L280 264.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24V250.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1H222.6c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/></svg>
     </header>
-    <div class="lang-row">
-      <div>
-        <label class="field-label" for="sl">Source language</label>
-        <textarea id="sl" placeholder="e.g. fr"></textarea>
+
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab-btn active" data-tab="text" role="tab" onclick="switchTab('text')">Paste text</button>
+      <button type="button" class="tab-btn" data-tab="epub" role="tab" onclick="switchTab('epub')">Upload EPUB</button>
+    </div>
+
+    <div class="tab-panel" data-tab="text">
+      <div class="lang-row">
+        <div>
+          <label class="field-label" for="sl">Source language</label>
+          <textarea id="sl" placeholder="e.g. fr"></textarea>
+        </div>
+        <div>
+          <label class="field-label" for="tl">Target language</label>
+          <textarea id="tl" placeholder="e.g. en"></textarea>
+        </div>
       </div>
-      <div>
-        <label class="field-label" for="tl">Target language</label>
-        <textarea id="tl" placeholder="e.g. en"></textarea>
+      <label class="field-label" for="book-title">Book title</label>
+      <textarea id="book-title" placeholder="My Bilingual Book"></textarea>
+      <label class="field-label" for="source-text">Source text</label>
+      <textarea id="source-text" placeholder="Enter your source text here..."></textarea>
+      <div class="actions">
+        <button onclick="generateBilingualBook()">Generate Book</button>
+        <button class="btn-secondary" onclick="toggleTheme()">Toggle Theme</button>
       </div>
     </div>
-    <label class="field-label" for="book-title">Book title</label>
-    <textarea id="book-title" placeholder="My Bilingual Book"></textarea>
-    <label class="field-label" for="source-text">Source text</label>
-    <textarea id="source-text" placeholder="Enter your source text here..."></textarea>
-    <div class="actions">
-      <button onclick="generateBilingualBook()">Generate Book</button>
-      <button class="btn-secondary" onclick="toggleTheme()">Toggle Theme</button>
+
+    <div class="tab-panel hide" data-tab="epub">
+      <label class="field-label" for="epub-file">EPUB file</label>
+      <input type="file" id="epub-file" accept=".epub,application/epub+zip" onchange="onEpubFileSelected(event)"/>
+      <p id="epub-status">Choose an EPUB file. Chapters and paragraphs will be detected automatically.</p>
+      <div id="epub-info" class="hide"></div>
+
+      <div class="lang-row">
+        <div>
+          <label class="field-label" for="epub-sl">Source language</label>
+          <textarea id="epub-sl" placeholder="e.g. en"></textarea>
+        </div>
+        <div>
+          <label class="field-label" for="epub-tl">Target language</label>
+          <textarea id="epub-tl" placeholder="e.g. fr"></textarea>
+        </div>
+      </div>
+      <label class="field-label" for="epub-book-title">Book title (override)</label>
+      <textarea id="epub-book-title" placeholder="Leave blank to keep the original title"></textarea>
+      <div class="actions">
+        <button id="epub-convert-btn" onclick="convertEpub()" disabled>Convert EPUB</button>
+        <button class="btn-secondary" onclick="toggleTheme()">Toggle Theme</button>
+      </div>
     </div>
   </div>
   <div id="output"></div>
