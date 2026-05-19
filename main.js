@@ -71,6 +71,10 @@ async function generateBilingualBook() {
   var bookContainer = document.getElementById('output');
   bookContainer.innerHTML = '';
 
+  document.querySelector('.del')?.classList.add('hide');
+  document.querySelector('#info')?.classList.add('hide');
+  document.querySelector('.book-actions')?.remove();
+
   var paragraphs = sourceText.replaceAll("\n", " ").replaceAll(".", ".\n").split("\n");
 
   var sourceLang = document.getElementById('sl').value;
@@ -79,10 +83,6 @@ async function generateBilingualBook() {
   for (var i = 0; i < paragraphs.length; i++) {
     await sleep(3);
     var paragraph = document.createElement('div');
-    paragraph.style.display = "flex";
-    paragraph.style.justifyContent = "space-between";
-    paragraph.style.gap = "10px";
-    paragraph.style.marginBottom = "10px";
     paragraph.className = 'paragraph';
 
     var sourcePara = document.createElement('div');
@@ -107,22 +107,33 @@ async function generateBilingualBook() {
 
     translateParagraph(paragraphs[i], englishPara, sourceLang, targetLang);
   }
-  const elementToDelete = document.querySelector('.del');
-  if (elementToDelete) {
-    elementToDelete.remove();
-  }
-  const infoElement = document.querySelector('#info');
-  if (infoElement) {
-    infoElement.remove();
-  }
 
   await sleep(5000);
-  text = document.body.innerHTML.replaceAll("&nbsp;", "");
-  
-  let button = document.createElement('button');
-  button.addEventListener('click', makeBook);
-  button.innerText = "Download Epub";
-  document.body.prepend(button);
+
+  const actions = document.createElement('div');
+  actions.className = 'book-actions';
+
+  const downloadBtn = document.createElement('button');
+  downloadBtn.addEventListener('click', () => {
+    text = document.getElementById('output').innerHTML.replaceAll("&nbsp;", "");
+    makeBook();
+  });
+  downloadBtn.innerText = "Download Epub";
+
+  const deleteBtn = document.createElement('button');
+  deleteBtn.className = 'btn-secondary';
+  deleteBtn.addEventListener('click', resetBook);
+  deleteBtn.innerText = "Delete Book";
+
+  actions.appendChild(downloadBtn);
+  actions.appendChild(deleteBtn);
+  document.body.prepend(actions);
+}
+
+function resetBook() {
+  document.getElementById('output').innerHTML = '';
+  document.querySelector('.book-actions')?.remove();
+  document.querySelector('.del')?.classList.remove('hide');
 }
 
 function toggleTheme() {

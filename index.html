@@ -228,10 +228,26 @@
       color: var(--text);
     }
 
-    #info p > a,
+    a,
     #info u {
       color: var(--accent);
       cursor: pointer;
+      text-decoration: none;
+    }
+
+    a:hover,
+    #info u:hover {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .book-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 20px;
+      max-width: 900px;
+      margin: 0 auto;
     }
 
     kbd {
