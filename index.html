@@ -371,10 +371,15 @@
       border-color: var(--accent);
     }
 
-    #epub-status {
+    #epub-status,
+    .field-hint {
       font-size: 0.85rem;
       color: var(--muted);
       margin: 0 0 12px;
+    }
+
+    .field-hint u {
+      cursor: pointer;
     }
 
     #epub-status.error {
@@ -490,35 +495,19 @@
       <svg class="icon" onclick="toggleInfo();" viewBox="0 0 512 512" aria-hidden="true"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"/></svg>
     </header>
 
-    <h2>Step 1: Find the source text</h2>
-    <p>The program will break each line by full stops rather than paragraphs or other punctionation so keep that in mind. Click <u onClick="copy()">here</u> to copy the first page of Harry Potter to show how to formated correctly and to demonstrate the generator</p>
+    <p>This tool generates a side-by-side bilingual edition of any text you give it. Pick the input that matches what you have.</p>
 
-    <h2>Step 2: Select Source and Target Languages</h2>
-    <p>Find the text areas labeled "Enter the code of your source language" and "Enter the code of your target language." In the first text area, enter the language code of the source language (e.g., "fr" for French). In the second text area, enter the language code of the target language (e.g., "en" for English).</p>
+    <h2>Paste text</h2>
+    <p>Drop any passage into the source box and the generator splits it at full stops, translates each sentence, and packages the pairs into a single-chapter EPUB. Best for short stories, articles, or anything you can copy out of a webpage or PDF &mdash; the bilingual output is one short pair per sentence, not per paragraph. Use <u onClick="copy()">the sample passage</u> if you want to see the expected format before pasting your own text.</p>
 
-    <h2>Step 3: Input Source Text</h2>
-    <p>Below the language code text areas, there is a text area labeled "Enter source text." Type or paste the source text you want to translate and generate a bilingual book from.</p>
+    <h2>Upload EPUB</h2>
+    <p>Pick an existing <code>.epub</code> file and the generator parses its spine, walks every chapter's paragraphs and headings, translates each block, and assembles a new bilingual EPUB that preserves chapter boundaries, the original chapter titles, and the cover image. Best for full books. The source language and book title are detected from the EPUB metadata, so most of the time you only need to fill in the target language.</p>
 
-    <h2>Step 4: Generate Bilingual Book</h2>
-    <p>Click the "Generate Book" button to start the translation and book generation process.</p>
+    <h2>Saving as PDF</h2>
+    <p>Once the bilingual book is on screen, press <kbd>Ctrl + P</kbd> (Windows) or <kbd>Command + P</kbd> (Mac), choose <em>Save as PDF</em>, and set margins to 0 for the cleanest layout.</p>
 
-    <h2>Step 5: Wait for Translation</h2>
-    <p>The application will begin translating the source text paragraph by paragraph into the target language. Each paragraph will display the original source text on the left and the translated text on the right.</p>
-
-    <h2>Step 6: View Bilingual Book</h2>
-    <p>As the application processes the paragraphs, a bilingual book will be generated on the screen. The left side of each paragraph will show the source text in the source language, and the right side will display the translated text in the target language.</p>
-
-    <h2>Step 7: Download the Epub</h2>
-    <p>There will be a button to download the Epub that will appear 5 seconds after the book is done generating</p>
-
-    <h2>Step 8: Save as PDF</h2>
-    <p>Once the bilingual book is fully generated and displayed on the screen, press <kbd>Ctrl + P</kbd> (Windows) or <kbd>Command + P</kbd> (Mac) to open the print dialog.</p>
-    <p>In the print dialog, select the printer as "Save as PDF" or a similar option.</p>
-    <p>Adjust any print settings you desire, such as page orientation, margins, and more. I suggest setting margins to 0</p>
-    <p>Click the "Save" or "Print" button to save the bilingual book as a PDF file on your computer.</p>
-    <br>
-    <p>Click <a href="./animal-farm-en-fr.html">here</a> for an example of a finish book.</p>
-    <p>And click <a href="./animal-farm-en-fr.pdf">here</a> for an example of a finished book in pdf form.</p>
+    <h2>Examples</h2>
+    <p>See a finished book as <a href="./animal-farm-en-fr.html">HTML</a> or <a href="./animal-farm-en-fr.pdf">PDF</a>.</p>
     <br>
     <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="lachydauth" data-color="#FFDD00" data-emoji=""  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>
   </div>
@@ -547,6 +536,7 @@
       <label class="field-label" for="book-title">Book title</label>
       <textarea id="book-title" placeholder="My Bilingual Book"></textarea>
       <label class="field-label" for="source-text">Source text</label>
+      <p class="field-hint">Text is split at full stops, one pair per sentence. <u onclick="copy()">Load a sample</u>.</p>
       <textarea id="source-text" placeholder="Enter your source text here..."></textarea>
       <div class="actions">
         <button onclick="generateBilingualBook()">Generate Book</button>
