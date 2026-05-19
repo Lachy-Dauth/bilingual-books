@@ -119,9 +119,13 @@
       box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.15);
     }
 
-    #sl, #tl {
+    #sl, #tl, #book-title {
       height: 44px;
       resize: none;
+    }
+
+    #book-title {
+      margin-bottom: 14px;
     }
 
     #source-text {
@@ -359,6 +363,8 @@
         <textarea id="tl" placeholder="e.g. en"></textarea>
       </div>
     </div>
+    <label class="field-label" for="book-title">Book title</label>
+    <textarea id="book-title" placeholder="My Bilingual Book"></textarea>
     <label class="field-label" for="source-text">Source text</label>
     <textarea id="source-text" placeholder="Enter your source text here..."></textarea>
     <div class="actions">

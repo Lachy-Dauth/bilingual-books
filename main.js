@@ -35,7 +35,8 @@ function makeBook() {
   }
 
   const bookId = `urn:uuid:${uuid()}`;
-  const title = `Bilingual Book (${sourceLang} → ${targetLang})`;
+  const userTitle = (document.getElementById('book-title')?.value || '').trim();
+  const title = userTitle || `Bilingual Book (${sourceLang} → ${targetLang})`;
   const srcDir = RTL_LANGS.includes(sourceLang) ? 'rtl' : 'ltr';
   const tgtDir = RTL_LANGS.includes(targetLang) ? 'rtl' : 'ltr';
 
@@ -130,7 +131,8 @@ h1 { font-size: 1.4em; text-align: center; margin: 1em 0 2em; }
     mimeType: "application/epub+zip",
     compression: "DEFLATE"
   }).then(content => {
-    saveAs(content, `bilingual-${sourceLang}-${targetLang}.epub`);
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'bilingual-book';
+    saveAs(content, `${slug}.epub`);
   });
 }
 
