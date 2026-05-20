@@ -31,7 +31,7 @@ export default function TermsPage() {
       <p>
         If you create an account, you are responsible for the activity that
         happens under it. Keep your password safe. Tell us at{' '}
-        <a href="mailto:[your-email@example.com]">[your-email@example.com]</a>{' '}
+        <a href="mailto:bilingualbooksgen@gmail.com">bilingualbooksgen@gmail.com</a>{' '}
         if you suspect it has been compromised.
       </p>
 
@@ -114,7 +114,7 @@ export default function TermsPage() {
       <h2>12. Contact</h2>
       <p>
         Questions? Email{' '}
-        <a href="mailto:[your-email@example.com]">[your-email@example.com]</a>.
+        <a href="mailto:bilingualbooksgen@gmail.com">bilingualbooksgen@gmail.com</a>.
       </p>
     </main>
   );

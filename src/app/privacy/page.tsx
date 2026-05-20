@@ -15,7 +15,7 @@ export default function PrivacyPage() {
       <p>
         This page explains what data Bilingual Books collects, why, and what
         you can do about it. If you have questions, email{' '}
-        <a href="mailto:[your-email@example.com]">[your-email@example.com]</a>.
+        <a href="mailto:bilingualbooksgen@gmail.com">bilingualbooksgen@gmail.com</a>.
       </p>
 
       <h2>1. Who runs this site</h2>
@@ -114,7 +114,7 @@ export default function PrivacyPage() {
         Depending on where you live, you may have the right to access, correct,
         export, or delete your personal data, and to withdraw consent for
         analytics. To exercise any of these rights, email us at{' '}
-        <a href="mailto:[your-email@example.com]">[your-email@example.com]</a>{' '}
+        <a href="mailto:bilingualbooksgen@gmail.com">bilingualbooksgen@gmail.com</a>{' '}
         from the address on your account. We will respond within 30 days.
       </p>
       <p>
@@ -141,7 +141,7 @@ export default function PrivacyPage() {
       <h2>8. Contact</h2>
       <p>
         Questions? Email{' '}
-        <a href="mailto:[your-email@example.com]">[your-email@example.com]</a>.
+        <a href="mailto:bilingualbooksgen@gmail.com">bilingualbooksgen@gmail.com</a>.
       </p>
     </main>
   );
