@@ -1,9 +1,22 @@
-import { Resend } from 'resend';
+import nodemailer, { type Transporter } from 'nodemailer';
 
-const apiKey = process.env.RESEND_API_KEY;
-const from = process.env.RESEND_FROM || 'Bilingual Books <onboarding@resend.dev>';
+const host = process.env.SMTP_HOST || 'smtp.gmail.com';
+const port = Number(process.env.SMTP_PORT || 465);
+const user = process.env.SMTP_USER;
+const pass = process.env.SMTP_PASS;
+const from =
+  process.env.SMTP_FROM ||
+  (user ? `Bilingual Books <${user}>` : 'Bilingual Books');
 
-const resend = apiKey ? new Resend(apiKey) : null;
+const transporter: Transporter | null =
+  user && pass
+    ? nodemailer.createTransport({
+        host,
+        port,
+        secure: port === 465,
+        auth: { user, pass },
+      })
+    : null;
 
 export type SendEmailOptions = {
   to: string;
@@ -12,26 +25,29 @@ export type SendEmailOptions = {
 };
 
 /**
- * Send a transactional email via Resend. If RESEND_API_KEY is not configured
- * the email is only logged — useful for local dev and for graceful degradation
- * in production until the API key is set in Railway.
+ * Send a transactional email via SMTP (Gmail by default).
+ *
+ * When SMTP_USER / SMTP_PASS aren't set, the helper logs the message
+ * instead of sending — local dev and first-time deploys keep working
+ * without credentials.
  */
 export async function sendEmail(opts: SendEmailOptions): Promise<void> {
-  if (!resend) {
+  if (!transporter) {
     console.warn(
-      `[email] RESEND_API_KEY is not set. Would have sent to ${opts.to}: "${opts.subject}"`,
+      `[email] SMTP credentials missing. Would have sent to ${opts.to}: "${opts.subject}"`,
     );
     return;
   }
-  const { error } = await resend.emails.send({
-    from,
-    to: opts.to,
-    subject: opts.subject,
-    html: opts.html,
-  });
-  if (error) {
-    console.error('[email] Resend send failed:', error);
-    throw new Error(`Failed to send email: ${error.message ?? 'unknown'}`);
+  try {
+    await transporter.sendMail({
+      from,
+      to: opts.to,
+      subject: opts.subject,
+      html: opts.html,
+    });
+  } catch (err) {
+    console.error('[email] SMTP send failed:', err);
+    throw new Error(`Failed to send email: ${(err as Error).message}`);
   }
 }
 
