@@ -109,6 +109,33 @@ a:hover {
   flex: 1;
 }
 
+.converter-shell .segmented {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 2px;
+  gap: 2px;
+  margin-bottom: 14px;
+}
+.converter-shell .segmented button {
+  background: transparent;
+  border: none;
+  padding: 6px 14px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--muted);
+  border-radius: calc(var(--radius) - 2px);
+  cursor: pointer;
+}
+.converter-shell .segmented button.active {
+  background: var(--accent);
+  color: #fff;
+}
+.converter-shell .segmented button:not(.active):hover {
+  color: var(--accent);
+}
+
 .converter-shell textarea,
 .converter-shell input[type='text'] {
   width: 100%;
@@ -277,7 +304,13 @@ body.bw .converter-shell input[type='text']:focus {
 .converter-shell .paragraph {
   display: flex;
   gap: 16px;
-  padding: 10px 20px;
+  padding: 4px 20px;
+}
+.converter-shell .paragraph.paragraph-end {
+  padding-bottom: 18px;
+}
+.converter-shell .paragraph.paragraph-end + .paragraph {
+  padding-top: 10px;
 }
 .converter-shell .paragraph.is-heading .source,
 .converter-shell .paragraph.is-heading .english {

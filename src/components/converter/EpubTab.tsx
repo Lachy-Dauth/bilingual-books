@@ -6,7 +6,8 @@ import { parseEpub } from '@/lib/converter/epub-parse';
 import { translateAll, type CancelSignal } from '@/lib/converter/translate';
 import { buildEpub, saveBlobAs } from '@/lib/converter/epub-build';
 import { countWords, slugify } from '@/lib/converter/util';
-import type { ParsedEpub, TranslationItem } from '@/lib/converter/types';
+import { expandParsed } from '@/lib/converter/expand';
+import type { ParsedEpub, SplitMode, TranslationItem } from '@/lib/converter/types';
 import { logConversion, precheck } from '@/lib/client/api';
 import { BuyMeACoffee } from '@/components/BuyMeACoffee';
 import { DownloadBar } from './DownloadBar';
@@ -18,16 +19,20 @@ export function EpubTab({
 }: {
   gutenbergSeed?: { bytes: ArrayBuffer; suggestedTitle: string; gutenbergId: number };
 }) {
+  const [rawParsed, setRawParsed] = useState<ParsedEpub | null>(null);
   const [parsed, setParsed] = useState<ParsedEpub | null>(null);
+  const [mode, setMode] = useState<SplitMode>('paragraph');
   const [sl, setSl] = useState('');
   const [tl, setTl] = useState('');
   const [titleOverride, setTitleOverride] = useState('');
-  const [status, setStatus] = useState('Choose an EPUB file. Chapters and paragraphs will be detected automatically.');
+  const [status, setStatus] = useState(
+    'Choose an EPUB file. Chapters and paragraphs will be detected automatically.',
+  );
   const [errorStatus, setErrorStatus] = useState(false);
   const [phase, setPhase] = useState<Phase>('idle');
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [limitMsg, setLimitMsg] = useState<string | null>(null);
-  const [items, setItems] = useState<TranslationItem[]>([]);
+  const [hasOutput, setHasOutput] = useState(false);
   const cancelRef = useRef<CancelSignal>({ cancelled: false });
   const downloadRef = useRef<{ blob: Blob; filename: string } | null>(null);
 
@@ -37,12 +42,16 @@ export function EpubTab({
     try {
       const p = await parseEpub(buf);
       const totalBlocks = p.chapters.reduce((s, c) => s + c.blocks.length, 0);
-      setParsed(p);
+      setRawParsed(p);
+      setParsed(expandParsed(p, mode));
       setStatus(`Loaded: ${p.chapters.length} chapters, ${totalBlocks} blocks.`);
       setPhase('parsed');
+      setHasOutput(false);
+      downloadRef.current = null;
       setSl((cur) => cur || (p.language ? normalizeLanguageCode(p.language) : cur));
       setTitleOverride((cur) => cur || p.title || fallbackTitle);
     } catch (err) {
+      setRawParsed(null);
       setParsed(null);
       setStatus(`Could not read EPUB: ${(err as Error).message}`);
       setErrorStatus(true);
@@ -50,12 +59,23 @@ export function EpubTab({
     }
   }
 
-  // Seed from Gutenberg tab — run once on mount when seed bytes are present
+  // Seed from Gutenberg tab — run once when seed bytes arrive
   useEffect(() => {
     if (!gutenbergSeed) return;
     void handleFile(gutenbergSeed.bytes, gutenbergSeed.suggestedTitle);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gutenbergSeed]);
+
+  // Re-expand whenever mode changes (only when nothing is in flight)
+  useEffect(() => {
+    if (!rawParsed) return;
+    if (phase === 'translating') return;
+    setParsed(expandParsed(rawParsed, mode));
+    setHasOutput(false);
+    downloadRef.current = null;
+    setPhase(rawParsed ? 'parsed' : 'idle');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   async function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -98,8 +118,8 @@ export function EpubTab({
     }
 
     cancelRef.current = { cancelled: false };
-    setItems(all);
     setProgress({ done: 0, total: all.length });
+    setHasOutput(true);
     setPhase('translating');
     const start = Date.now();
 
@@ -109,7 +129,8 @@ export function EpubTab({
       targetLang,
       ({ done, total, item }) => {
         setProgress({ done, total });
-        parsed.chapters[item.chapterIdx].blocks[item.blockIdx].translation = item.translation;
+        parsed.chapters[item.chapterIdx].blocks[item.blockIdx].translation =
+          item.translation;
       },
       cancelRef.current,
     );
@@ -144,8 +165,8 @@ export function EpubTab({
   }
 
   const totalBlocks = parsed?.chapters.reduce((s, c) => s + c.blocks.length, 0) ?? 0;
-
-  const downloadReady = (phase === 'done' || phase === 'cancelled') && downloadRef.current;
+  const downloadReady =
+    (phase === 'done' || phase === 'cancelled') && downloadRef.current;
 
   return (
     <>
@@ -187,7 +208,7 @@ export function EpubTab({
             ['Author', parsed.author || '—'],
             ['Detected language', parsed.language || '—'],
             ['Chapters', String(parsed.chapters.length)],
-            ['Paragraphs / headings', String(totalBlocks)],
+            [mode === 'sentence' ? 'Sentences / headings' : 'Paragraphs / headings', String(totalBlocks)],
           ].map(([k, v]) => (
             <div className="info-row" key={k}>
               <span className="info-key">{k}</span>
@@ -196,6 +217,26 @@ export function EpubTab({
           ))}
         </div>
       )}
+
+      <label className="field-label">Split translation by</label>
+      <div className="segmented" role="tablist" aria-label="Split mode">
+        <button
+          type="button"
+          className={mode === 'paragraph' ? 'active' : ''}
+          onClick={() => setMode('paragraph')}
+          disabled={phase === 'translating'}
+        >
+          Paragraph
+        </button>
+        <button
+          type="button"
+          className={mode === 'sentence' ? 'active' : ''}
+          onClick={() => setMode('sentence')}
+          disabled={phase === 'translating'}
+        >
+          Sentence
+        </button>
+      </div>
 
       <div className="lang-row">
         <div>
@@ -260,13 +301,15 @@ export function EpubTab({
           <div className="progress-track">
             <div
               className="progress-fill"
-              style={{ width: `${((progress.done / progress.total) * 100).toFixed(1)}%` }}
+              style={{
+                width: `${((progress.done / progress.total) * 100).toFixed(1)}%`,
+              }}
             />
           </div>
         </div>
       )}
 
-      {items.length > 0 && parsed && (
+      {hasOutput && parsed && (
         <div style={{ marginTop: 28 }}>
           {parsed.chapters.map((chapter, c) => (
             <div className="chapter" key={c}>
@@ -274,7 +317,13 @@ export function EpubTab({
               {chapter.blocks.map((block, b) => (
                 <div
                   key={b}
-                  className={`paragraph ${/^h[1-6]$/.test(block.tag) ? 'is-heading' : ''}`}
+                  className={[
+                    'paragraph',
+                    /^h[1-6]$/.test(block.tag) ? 'is-heading' : '',
+                    block.paragraphEnd ? 'paragraph-end' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
                 >
                   <div className={`source ${isRtl(sl.toLowerCase()) ? 'rtl' : ''}`}>
                     {block.text}

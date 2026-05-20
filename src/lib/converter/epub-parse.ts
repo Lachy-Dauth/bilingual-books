@@ -25,6 +25,38 @@ function getDcText(doc: Document, localName: string): string {
   return el ? (el.textContent ?? '').trim() : '';
 }
 
+/** Walks an element's descendants, returning its text content with <br>
+ *  elements rendered as `\n`. Inline tags like <span>/<em>/<strong> are
+ *  flattened. Other block tags inside (rare) are also flattened — we trust
+ *  the BLOCK_SELECTOR loop to have already filtered nested blocks via the
+ *  `seen` set. */
+function extractTextWithBreaks(el: Element): string {
+  let out = '';
+  const walker = el.ownerDocument.createTreeWalker(
+    el,
+    NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT,
+  );
+  let node: Node | null = walker.nextNode();
+  while (node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      out += node.textContent ?? '';
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      const tag = (node as Element).tagName.toLowerCase();
+      if (tag === 'br') out += '\n';
+    }
+    node = walker.nextNode();
+  }
+  return out;
+}
+
+function normalizeText(s: string): string {
+  return s
+    .replace(/[ \t \f\v]+/g, ' ')
+    .replace(/[ ]*\n[ ]*/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 function extractBlocks(content: string): Block[] {
   const parser = new DOMParser();
   let doc = parser.parseFromString(content, 'application/xhtml+xml');
@@ -43,10 +75,18 @@ function extractBlocks(content: string): Block[] {
       if (seen.has(parent)) return;
       parent = parent.parentElement;
     }
-    const text = (el.textContent ?? '').replace(/\s+/g, ' ').trim();
-    if (!text) return;
+    const raw = normalizeText(extractTextWithBreaks(el));
+    if (!raw) return;
     seen.add(el);
-    blocks.push({ tag: el.tagName.toLowerCase(), text });
+    const tag = el.tagName.toLowerCase();
+    const lines = raw.split('\n').map((l) => l.trim()).filter(Boolean);
+    lines.forEach((line, i) => {
+      blocks.push({
+        tag,
+        text: line,
+        paragraphEnd: i === lines.length - 1,
+      });
+    });
   });
   return blocks;
 }

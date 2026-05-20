@@ -7,7 +7,8 @@ const EPUB_CSS = `body { font-family: serif; margin: 1em; line-height: 1.5; }
 h1, h2, h3 { text-align: center; margin: 1em 0 0.5em; }
 .chapter-title { font-size: 1.5em; }
 .chapter-subtitle { font-size: 1.05em; color: #555; font-weight: normal; margin-top: -0.3em; }
-.pair { display: table; width: 100%; margin: 0 0 1em; border-collapse: collapse; page-break-inside: avoid; }
+.pair { display: table; width: 100%; margin: 0 0 0.4em; border-collapse: collapse; page-break-inside: avoid; }
+.pair.paragraph-end { margin-bottom: 1.4em; }
 .pair > div { display: table-cell; width: 50%; vertical-align: top; padding: 0.3em 0.6em; }
 .src { border-right: 1px solid #ccc; }
 .rtl { direction: rtl; text-align: right; }
@@ -43,6 +44,7 @@ function buildChapterXhtml(
     const classes = ['pair'];
     if (isHeading) classes.push('heading', tag);
     else if (isQuote) classes.push('blockquote');
+    if (block.paragraphEnd) classes.push('paragraph-end');
     const srcClass = 'src' + (srcDir === 'rtl' ? ' rtl' : '');
     const tgtClass = 'tgt' + (tgtDir === 'rtl' ? ' rtl' : '');
     parts.push(

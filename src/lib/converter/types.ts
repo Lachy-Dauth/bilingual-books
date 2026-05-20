@@ -2,7 +2,12 @@ export type Block = {
   tag: string;
   text: string;
   translation?: string;
+  /** True on the last sub-block of an original parsed element (used to add
+   *  larger vertical spacing between paragraphs in both modes). */
+  paragraphEnd?: boolean;
 };
+
+export type SplitMode = 'paragraph' | 'sentence';
 
 export type Chapter = {
   spineIndex: number;
