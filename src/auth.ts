@@ -1,7 +1,6 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { prisma } from '@/lib/db';
-import { passwordResetHtml, sendEmail } from '@/lib/email';
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -14,22 +13,19 @@ export const auth = betterAuth({
     enabled: true,
     autoSignIn: true,
     requireEmailVerification: false,
-    sendResetPassword: async ({ user, url }) => {
-      // Fire-and-forget: SMTP can take several seconds (or hang on bad
-      // creds), and we don't want the /forgot-password response to wait
-      // on it. The user sees the success message immediately; failures
-      // are logged on the server side.
-      void sendEmail({
-        to: user.email,
-        subject: 'Reset your Bilingual Books password',
-        html: passwordResetHtml(url),
-      }).catch((err) => {
-        console.error(
-          `[auth] Failed to deliver reset email to ${user.email}:`,
-          err,
-        );
-      });
-    },
+    // Password reset is intentionally disabled in the UI for now. The
+    // Gmail-API transport in src/lib/email.ts is fully wired and the
+    // admin diagnostics panel still exercises it; to re-enable the
+    // user flow, restore /forgot-password + /reset-password and add
+    // the sendResetPassword callback back here:
+    //
+    //   sendResetPassword: async ({ user, url }) => {
+    //     void sendEmail({
+    //       to: user.email,
+    //       subject: 'Reset your Bilingual Books password',
+    //       html: passwordResetHtml(url),
+    //     });
+    //   },
   },
   socialProviders:
     googleClientId && googleClientSecret

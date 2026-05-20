@@ -59,15 +59,7 @@ export function SignInForm({ googleEnabled }: { googleEnabled: boolean }) {
         className="w-full border rounded px-3 py-2 mb-3"
       />
 
-      <div className="flex items-baseline justify-between mb-1">
-        <label className="block text-sm font-semibold">Password</label>
-        <a
-          href="/forgot-password"
-          className="text-xs text-[color:var(--accent)] font-semibold"
-        >
-          Forgot?
-        </a>
-      </div>
+      <label className="block text-sm font-semibold mb-1">Password</label>
       <input
         type="password"
         required
