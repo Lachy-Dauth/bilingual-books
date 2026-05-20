@@ -1,14 +1,19 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { isRtl, normalizeLanguageCode } from '@/lib/converter/constants';
+import { isRtl, normalizeLanguageCode, SPEED_LEVELS } from '@/lib/converter/constants';
 import { parseEpub } from '@/lib/converter/epub-parse';
 import { translateAll, type CancelSignal } from '@/lib/converter/translate';
 import { buildEpub, saveBlobAs } from '@/lib/converter/epub-build';
 import { countWords, slugify } from '@/lib/converter/util';
 import { expandParsed } from '@/lib/converter/expand';
 import { sentenceAlignParsed } from '@/lib/converter/align';
-import type { ParsedEpub, SplitMode, TranslationItem } from '@/lib/converter/types';
+import type {
+  ParsedEpub,
+  SpeedMode,
+  SplitMode,
+  TranslationItem,
+} from '@/lib/converter/types';
 import { logConversion, precheck } from '@/lib/client/api';
 import { BuyMeACoffee } from '@/components/BuyMeACoffee';
 import { DownloadBar } from './DownloadBar';
@@ -26,6 +31,7 @@ export function EpubTab({
   const [parsed, setParsed] = useState<ParsedEpub | null>(null);
   const [mode, setMode] = useState<SplitMode>('paragraph');
   const [collapseBreaks, setCollapseBreaks] = useState(false);
+  const [speed, setSpeed] = useState<SpeedMode>('normal');
   const [sl, setSl] = useState('');
   const [tl, setTl] = useState('');
   const [titleOverride, setTitleOverride] = useState('');
@@ -137,6 +143,7 @@ export function EpubTab({
           item.translation;
       },
       cancelRef.current,
+      SPEED_LEVELS[speed],
     );
 
     const cancelled = cancelRef.current.cancelled;
@@ -285,6 +292,58 @@ export function EpubTab({
           title="Translate paragraph by paragraph (full context), then split the result into aligned sentence pairs."
         >
           Sentence (aligned)
+        </button>
+      </div>
+
+      <label className="field-label">
+        Speed
+        <HelpTip>
+          <p>
+            <strong>Slow</strong> &mdash; 2 simultaneous translations. Easiest
+            on Google&rsquo;s free endpoint and never trips its rate limit,
+            but takes the longest for big books.
+          </p>
+          <p>
+            <strong>Normal</strong> &mdash; 6 simultaneous translations. The
+            balance that&rsquo;s worked well in practice; the occasional
+            429 is retried with backoff.
+          </p>
+          <p>
+            <strong>Fast</strong> &mdash; 12 simultaneous translations. Often
+            faster, but Google may start returning 429 (rate limit). The
+            client automatically backs off and retries, so this can end up
+            no faster than Normal &mdash; sometimes slower &mdash; on long
+            books.
+          </p>
+        </HelpTip>
+      </label>
+      <div className="segmented" role="tablist" aria-label="Translation speed">
+        <button
+          type="button"
+          className={speed === 'slow' ? 'active' : ''}
+          onClick={() => setSpeed('slow')}
+          disabled={phase === 'translating'}
+          title="2 simultaneous translations. Safest, slowest."
+        >
+          Slow
+        </button>
+        <button
+          type="button"
+          className={speed === 'normal' ? 'active' : ''}
+          onClick={() => setSpeed('normal')}
+          disabled={phase === 'translating'}
+          title="6 simultaneous translations. Default, balanced."
+        >
+          Normal
+        </button>
+        <button
+          type="button"
+          className={speed === 'fast' ? 'active' : ''}
+          onClick={() => setSpeed('fast')}
+          disabled={phase === 'translating'}
+          title="12 simultaneous translations. Risk of rate-limit retries."
+        >
+          Fast
         </button>
       </div>
 

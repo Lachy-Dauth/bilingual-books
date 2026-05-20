@@ -9,6 +9,8 @@ export type Block = {
 
 export type SplitMode = 'paragraph' | 'sentence' | 'sentence-aligned';
 
+export type SpeedMode = 'slow' | 'normal' | 'fast';
+
 export type Chapter = {
   spineIndex: number;
   href: string;

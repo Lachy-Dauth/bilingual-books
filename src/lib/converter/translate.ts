@@ -84,13 +84,15 @@ export async function translateAll(
   targetLang: string,
   onProgress: (p: TranslationProgress) => void,
   cancel: CancelSignal = { cancelled: false },
+  concurrency: number = PARALLEL_TRANSLATIONS,
 ): Promise<void> {
   let done = 0;
   let cursor = 0;
   const total = items.length;
 
   const workers: Promise<void>[] = [];
-  for (let w = 0; w < PARALLEL_TRANSLATIONS; w++) {
+  const n = Math.max(1, Math.floor(concurrency));
+  for (let w = 0; w < n; w++) {
     workers.push(
       (async () => {
         while (cursor < items.length && !cancel.cancelled) {

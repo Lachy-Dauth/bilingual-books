@@ -14,6 +14,13 @@ export const RTL_LANGS = [
 export const PARALLEL_TRANSLATIONS = 6;
 export const BLOCK_SELECTOR = 'h1, h2, h3, h4, h5, h6, p, blockquote';
 
+/** Concurrency level for each speed setting in the converter UI. */
+export const SPEED_LEVELS: Record<'slow' | 'normal' | 'fast', number> = {
+  slow: 2,
+  normal: PARALLEL_TRANSLATIONS,
+  fast: 12,
+};
+
 export const LANG_3TO2: Record<string, string> = {
   eng: 'en', fra: 'fr', fre: 'fr', spa: 'es', deu: 'de', ger: 'de',
   ita: 'it', por: 'pt', rus: 'ru', jpn: 'ja', kor: 'ko', zho: 'zh',
