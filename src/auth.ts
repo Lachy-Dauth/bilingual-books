@@ -1,6 +1,7 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { prisma } from '@/lib/db';
+import { passwordResetHtml, sendEmail } from '@/lib/email';
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -14,21 +15,14 @@ export const auth = betterAuth({
     autoSignIn: true,
     requireEmailVerification: false,
     sendResetPassword: async ({ user, url }) => {
-      // No mail provider is wired up. The reset link is logged so that during
-      // local development / an admin running `railway logs` can grab it. To
-      // turn this into a real password-reset flow, plug in Resend / Postmark /
-      // SES here:
-      //
-      //   await resend.emails.send({
-      //     from: 'noreply@bilingualbooks.app',
-      //     to: user.email,
-      //     subject: 'Reset your password',
-      //     html: `<p>Reset your password: <a href="${url}">${url}</a></p>`,
-      //   });
-      console.log(
-        `[auth] Password reset requested for ${user.email}. ` +
-          `Reset URL (valid ~1h): ${url}`,
-      );
+      // Sends via Resend when RESEND_API_KEY is configured; otherwise the
+      // helper falls back to a console.warn so local dev / first-time setups
+      // still surface the reset link.
+      await sendEmail({
+        to: user.email,
+        subject: 'Reset your Bilingual Books password',
+        html: passwordResetHtml(url),
+      });
     },
   },
   socialProviders:

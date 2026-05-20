@@ -33,6 +33,10 @@ const REQUIRED: EnvSpec[] = [
 const RECOMMENDED: EnvSpec[] = [
   { name: 'ADMIN_EMAIL', hint: 'Email for the seeded admin account.' },
   { name: 'ADMIN_PASSWORD', hint: 'Password for the seeded admin account.' },
+  {
+    name: 'RESEND_API_KEY',
+    hint: 'Resend API key for sending password-reset emails. Without it, reset links are only logged (visible in `railway logs`).',
+  },
 ];
 
 export function validateEnv(): void {
