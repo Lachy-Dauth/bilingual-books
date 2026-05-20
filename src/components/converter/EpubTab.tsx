@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { isRtl, normalizeLanguageCode } from '@/lib/converter/constants';
 import { parseEpub } from '@/lib/converter/epub-parse';
 import { translateAll, type CancelSignal } from '@/lib/converter/translate';
@@ -39,8 +39,8 @@ export function EpubTab({
       setParsed(p);
       setStatus(`Loaded: ${p.chapters.length} chapters, ${totalBlocks} blocks.`);
       setPhase('parsed');
-      if (!sl && p.language) setSl(normalizeLanguageCode(p.language));
-      if (!titleOverride) setTitleOverride(p.title || fallbackTitle);
+      setSl((cur) => cur || (p.language ? normalizeLanguageCode(p.language) : cur));
+      setTitleOverride((cur) => cur || p.title || fallbackTitle);
     } catch (err) {
       setParsed(null);
       setStatus(`Could not read EPUB: ${(err as Error).message}`);
@@ -49,10 +49,12 @@ export function EpubTab({
     }
   }
 
-  // Seed from Gutenberg tab
-  if (gutenbergSeed && !parsed && phase === 'idle') {
+  // Seed from Gutenberg tab — run once on mount when seed bytes are present
+  useEffect(() => {
+    if (!gutenbergSeed) return;
     void handleFile(gutenbergSeed.bytes, gutenbergSeed.suggestedTitle);
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gutenbergSeed]);
 
   async function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
