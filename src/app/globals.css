@@ -228,6 +228,118 @@ body.bw .converter-shell input[type='text']:focus {
   height: 44px;
   resize: none;
 }
+
+/* ===== Language combobox ===== */
+.converter-shell .lang-combo {
+  position: relative;
+  width: 100%;
+}
+.converter-shell .lang-combo > input {
+  width: 100%;
+  padding-right: 30px;
+}
+.converter-shell .lang-combo-chevron {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+  font-size: 0.8rem;
+  transition: transform 0.15s;
+}
+.converter-shell .lang-combo:focus-within .lang-combo-chevron {
+  color: var(--accent);
+  transform: translateY(-50%) rotate(180deg);
+}
+.converter-shell .lang-combo-pill {
+  position: absolute;
+  top: 50%;
+  right: 28px;
+  transform: translateY(-50%);
+  background: rgba(140, 82, 20, 0.1);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  pointer-events: none;
+  max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+body.bw .converter-shell .lang-combo-pill {
+  background: rgba(0, 0, 0, 0.08);
+}
+.converter-shell .lang-combo-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 4px;
+  scrollbar-width: thin;
+}
+.converter-shell .lang-combo-list::-webkit-scrollbar {
+  width: 8px;
+}
+.converter-shell .lang-combo-list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+.converter-shell .lang-combo-option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: calc(var(--radius) - 2px);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: var(--text);
+}
+.converter-shell .lang-combo-option.highlight {
+  background: var(--accent);
+  color: #fff;
+}
+.converter-shell .lang-combo-option:active {
+  transform: translateY(0.5px);
+}
+.converter-shell .lang-combo-name {
+  font-weight: 500;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.converter-shell .lang-combo-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+.converter-shell .lang-combo-option.highlight .lang-combo-code {
+  color: rgba(255, 255, 255, 0.85);
+}
+.converter-shell .lang-combo-empty {
+  padding: 12px 10px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
 .converter-shell .book-title-input {
   height: 44px;
   resize: none;
