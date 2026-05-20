@@ -21,6 +21,12 @@ RUN apk add --no-cache openssl libc6-compat tini
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
+# Force Node's DNS resolver to prefer IPv4. Railway's outbound IPv6 isn't
+# routed, and Gmail (and other big providers) return both A and AAAA records;
+# Node's default ordering preferred IPv6, causing ENETUNREACH on every
+# outbound SMTP connect. The src-level dns.setDefaultResultOrder isn't
+# enough — this flag forces the order at the runtime level for every child.
+ENV NODE_OPTIONS="--dns-result-order=ipv4first"
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
