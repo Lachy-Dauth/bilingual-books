@@ -738,6 +738,144 @@ body.bw .converter-shell .lang-combo-pill {
   color: var(--muted);
   margin: 0;
 }
+.site-footer .footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  font-size: 0.85rem;
+}
+.site-footer .footer-links a,
+.site-footer .footer-links .footer-link-btn {
+  color: var(--muted);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+}
+.site-footer .footer-links a:hover,
+.site-footer .footer-links .footer-link-btn:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* ===== Cookie consent banner ===== */
+.consent-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+  padding: 14px 16px;
+}
+.consent-banner-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+.consent-banner-text {
+  flex: 1 1 320px;
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text);
+  line-height: 1.45;
+}
+.consent-banner-link {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+}
+.consent-banner-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+}
+.consent-banner-btn {
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  border: 1px solid var(--accent);
+  transition: background 0.15s;
+}
+.consent-banner-btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+.consent-banner-btn-primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+.consent-banner-btn-secondary {
+  background: transparent;
+  color: var(--accent);
+}
+.consent-banner-btn-secondary:hover {
+  background: rgba(140, 82, 20, 0.08);
+}
+body.bw .consent-banner-btn-secondary:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* ===== Privacy / terms typography ===== */
+.prose-policy {
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+.prose-policy h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+.prose-policy .meta {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-bottom: 24px;
+}
+.prose-policy h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 28px 0 8px;
+}
+.prose-policy h3 {
+  font-size: 1.02rem;
+  font-weight: 600;
+  margin: 18px 0 4px;
+  color: var(--muted);
+}
+.prose-policy p,
+.prose-policy ul {
+  margin: 0 0 12px;
+}
+.prose-policy ul {
+  padding-left: 22px;
+}
+.prose-policy li {
+  margin-bottom: 6px;
+}
+.prose-policy code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.88em;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+.prose-policy a {
+  color: var(--accent);
+  text-decoration: underline;
+}
 
 /* BMC link works both inside and outside .converter-shell */
 .bmc-link {

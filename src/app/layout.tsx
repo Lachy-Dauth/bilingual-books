@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
-import Script from 'next/script';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { ConsentProvider } from '@/components/consent/ConsentProvider';
+import { Analytics } from '@/components/consent/Analytics';
+import { ConsentBanner } from '@/components/consent/ConsentBanner';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -20,23 +22,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {GA_ID && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-              strategy="afterInteractive"
-            />
-            <Script id="ga-init" strategy="afterInteractive">
-              {`window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', '${GA_ID}');`}
-            </Script>
-          </>
-        )}
-        <Navbar />
-        <div className="site-content">{children}</div>
-        <Footer />
+        <ConsentProvider>
+          <Analytics gaId={GA_ID} />
+          <Navbar />
+          <div className="site-content">{children}</div>
+          <Footer />
+          <ConsentBanner />
+        </ConsentProvider>
       </body>
     </html>
   );
