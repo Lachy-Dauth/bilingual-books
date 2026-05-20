@@ -23,6 +23,7 @@ export function EpubTab({
   const [rawParsed, setRawParsed] = useState<ParsedEpub | null>(null);
   const [parsed, setParsed] = useState<ParsedEpub | null>(null);
   const [mode, setMode] = useState<SplitMode>('paragraph');
+  const [collapseBreaks, setCollapseBreaks] = useState(false);
   const [sl, setSl] = useState('');
   const [tl, setTl] = useState('');
   const [titleOverride, setTitleOverride] = useState('');
@@ -44,7 +45,7 @@ export function EpubTab({
       const p = await parseEpub(buf);
       const totalBlocks = p.chapters.reduce((s, c) => s + c.blocks.length, 0);
       setRawParsed(p);
-      setParsed(expandParsed(p, mode));
+      setParsed(expandParsed(p, mode, collapseBreaks));
       setStatus(`Loaded: ${p.chapters.length} chapters, ${totalBlocks} blocks.`);
       setPhase('parsed');
       setHasOutput(false);
@@ -67,16 +68,16 @@ export function EpubTab({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gutenbergSeed]);
 
-  // Re-expand whenever mode changes (only when nothing is in flight)
+  // Re-expand whenever mode or line-break handling changes (only when nothing is in flight)
   useEffect(() => {
     if (!rawParsed) return;
     if (phase === 'translating') return;
-    setParsed(expandParsed(rawParsed, mode));
+    setParsed(expandParsed(rawParsed, mode, collapseBreaks));
     setHasOutput(false);
     downloadRef.current = null;
     setPhase(rawParsed ? 'parsed' : 'idle');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode]);
+  }, [mode, collapseBreaks]);
 
   async function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -260,6 +261,28 @@ export function EpubTab({
           title="Translate paragraph by paragraph (full context), then split the result into aligned sentence pairs."
         >
           Sentence (aligned)
+        </button>
+      </div>
+
+      <label className="field-label">Line breaks (&lt;br&gt;)</label>
+      <div className="segmented" role="tablist" aria-label="Line break handling">
+        <button
+          type="button"
+          className={!collapseBreaks ? 'active' : ''}
+          onClick={() => setCollapseBreaks(false)}
+          disabled={phase === 'translating'}
+          title="Treat each <br>-separated line as its own translation pair."
+        >
+          Preserve
+        </button>
+        <button
+          type="button"
+          className={collapseBreaks ? 'active' : ''}
+          onClick={() => setCollapseBreaks(true)}
+          disabled={phase === 'translating'}
+          title="Ignore <br> tags inside paragraphs; the whole paragraph is one chunk."
+        >
+          Collapse
         </button>
       </div>
 

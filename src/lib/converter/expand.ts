@@ -2,6 +2,30 @@ import { splitSentences } from './sentences';
 import type { Block, Chapter, ParsedEpub, SplitMode } from './types';
 
 /**
+ * Merge consecutive sub-blocks (split on <br>/\n by parseEpub) back into one
+ * block per original paragraph. Use when the user doesn't want <br> treated
+ * as a paragraph boundary.
+ */
+export function collapseLineBreaks(blocks: Block[]): Block[] {
+  const merged: Block[] = [];
+  let bufTexts: string[] = [];
+  let bufTag: string | null = null;
+  for (const b of blocks) {
+    if (bufTag === null) bufTag = b.tag;
+    bufTexts.push(b.text);
+    if (b.paragraphEnd) {
+      merged.push({ tag: bufTag, text: bufTexts.join(' '), paragraphEnd: true });
+      bufTexts = [];
+      bufTag = null;
+    }
+  }
+  if (bufTexts.length && bufTag !== null) {
+    merged.push({ tag: bufTag, text: bufTexts.join(' '), paragraphEnd: true });
+  }
+  return merged;
+}
+
+/**
  * Expand a paragraph-mode block array into the requested mode.
  * - `paragraph` mode: returns the input unchanged (parseEpub already split
  *   on <br>/\n into per-line blocks).
@@ -25,14 +49,33 @@ export function expandBlocks(blocks: Block[], mode: SplitMode): Block[] {
   });
 }
 
-export function expandChapters(chapters: Chapter[], mode: SplitMode): Chapter[] {
-  if (mode === 'paragraph' || mode === 'sentence-aligned') return chapters;
+export function prepareBlocks(
+  blocks: Block[],
+  mode: SplitMode,
+  collapseBreaks: boolean,
+): Block[] {
+  const input = collapseBreaks ? collapseLineBreaks(blocks) : blocks;
+  return expandBlocks(input, mode);
+}
+
+export function expandChapters(
+  chapters: Chapter[],
+  mode: SplitMode,
+  collapseBreaks = false,
+): Chapter[] {
   return chapters.map((ch) => ({
     ...ch,
-    blocks: expandBlocks(ch.blocks, mode),
+    blocks: prepareBlocks(ch.blocks, mode, collapseBreaks),
   }));
 }
 
-export function expandParsed(parsed: ParsedEpub, mode: SplitMode): ParsedEpub {
-  return { ...parsed, chapters: expandChapters(parsed.chapters, mode) };
+export function expandParsed(
+  parsed: ParsedEpub,
+  mode: SplitMode,
+  collapseBreaks = false,
+): ParsedEpub {
+  return {
+    ...parsed,
+    chapters: expandChapters(parsed.chapters, mode, collapseBreaks),
+  };
 }
