@@ -474,19 +474,41 @@
       #epub-info .info-key { flex-basis: auto; }
     }
   </style>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HP6ZDS0E04"></script>
+  <!-- Cookie consent: set Google Consent Mode v2 defaults BEFORE gtag.js loads -->
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', {
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+      analytics_storage: 'denied',
+      functionality_storage: 'granted',
+      security_storage: 'granted',
+      wait_for_update: 500
+    });
+    try {
+      if (localStorage.getItem('cookie_consent') === 'accepted') {
+        gtag('consent', 'update', {
+          ad_storage: 'granted',
+          ad_user_data: 'granted',
+          ad_personalization: 'granted',
+          analytics_storage: 'granted'
+        });
+      }
+    } catch (e) {}
+  </script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HP6ZDS0E04"></script>
+  <script>
     gtag('js', new Date());
-
-    gtag('config', 'G-HP6ZDS0E04');
+    gtag('config', 'G-HP6ZDS0E04', { anonymize_ip: true });
   </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="main.js" defer></script>
   <script src="epub-converter.js" defer></script>
+  <script src="cookie-consent.js" defer></script>
 </head>
 <body>
   <div id="info">
