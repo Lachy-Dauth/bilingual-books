@@ -15,6 +15,10 @@ const transporter: Transporter | null =
         port,
         secure: port === 465,
         auth: { user, pass },
+        // Railway's outbound IPv6 is not reachable, so SMTP hosts that
+        // resolve to AAAA records (Google in particular) fail with
+        // ENETUNREACH. Force IPv4-only resolution.
+        family: 4,
         // Don't let a misconfigured SMTP host hang the request indefinitely.
         connectionTimeout: 10_000,
         greetingTimeout: 10_000,
