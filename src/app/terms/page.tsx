@@ -106,9 +106,9 @@ export default function TermsPage() {
 
       <h2>11. Governing law</h2>
       <p>
-        These terms are governed by the laws of [your jurisdiction], without
+        These terms are governed by the laws of Australia, without
         regard to its conflict-of-laws rules. Any dispute will be brought in
-        the courts of [your jurisdiction].
+        the courts of Australia.
       </p>
 
       <h2>12. Contact</h2>

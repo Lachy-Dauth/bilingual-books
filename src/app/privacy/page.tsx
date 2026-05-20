@@ -20,8 +20,8 @@ export default function PrivacyPage() {
 
       <h2>1. Who runs this site</h2>
       <p>
-        Bilingual Books is operated by [your name or company] from
-        [your jurisdiction]. We act as the data controller for the personal
+        Bilingual Books is operated by Lachlan Dauth from
+        Australia. We act as the data controller for the personal
         data described below.
       </p>
 
