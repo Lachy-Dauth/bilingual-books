@@ -41,10 +41,16 @@ function endsWithAbbreviation(chunk: string): boolean {
 export function splitSentences(text: string): string[] {
   const trimmed = text.trim();
   if (!trimmed) return [];
-  // Latin-script terminators (.!?؟) require following whitespace to split.
+  // Latin-script terminators (.!?؟) require following whitespace to split,
+  // and may be followed by an optional closing quote/guillemet/paren so
+  // dialog like  ...day." She  also ends a sentence at the period.
   // CJK terminators (。！？) split without whitespace because Chinese/Japanese
   // typically don't insert spaces between sentences.
-  const naive = trimmed.split(/(?<=[.!?؟])\s+|(?<=[。！？])/u);
+  // Don't split if the next chunk starts with a lowercase letter — likely
+  // a mid-sentence continuation like ' "Wait..." but stayed.' rather than a
+  // new sentence. (?!\p{Ll}) lets uppercase, digits, quotes, and scripts
+  // without case (CJK, Arabic, Hindi, …) all start a new sentence.
+  const naive = trimmed.split(/(?<=[.!?؟]["'”’»)]?)\s+(?!\p{Ll})|(?<=[。！？])/u);
   const result: string[] = [];
   let buf = '';
   for (const part of naive) {
