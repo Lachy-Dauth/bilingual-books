@@ -8,6 +8,7 @@ import { buildEpub, saveBlobAs } from '@/lib/converter/epub-build';
 import { countWords, slugify } from '@/lib/converter/util';
 import type { ParsedEpub, TranslationItem } from '@/lib/converter/types';
 import { logConversion, precheck } from '@/lib/client/api';
+import { BuyMeACoffee } from '@/components/BuyMeACoffee';
 
 type Phase = 'idle' | 'parsed' | 'translating' | 'done' | 'cancelled';
 
@@ -233,9 +234,12 @@ export function EpubTab({
           </button>
         )}
         {(phase === 'done' || phase === 'cancelled') && downloadRef.current && (
-          <button type="button" className="cs-btn" onClick={onDownload}>
-            Download EPUB
-          </button>
+          <>
+            <button type="button" className="cs-btn" onClick={onDownload}>
+              Download EPUB
+            </button>
+            <BuyMeACoffee label="Liked it? Buy me a coffee" />
+          </>
         )}
       </div>
 

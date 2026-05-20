@@ -1,5 +1,7 @@
 'use client';
 
+import { BuyMeACoffee } from '@/components/BuyMeACoffee';
+
 export function InfoModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   if (!open) return null;
   return (
@@ -54,6 +56,10 @@ export function InfoModal({ open, onClose }: { open: boolean; onClose: () => voi
           <kbd>Ctrl + P</kbd> (Windows) or <kbd>Command + P</kbd> (Mac), choose{' '}
           <em>Save as PDF</em>, and set margins to 0 for the cleanest layout.
         </p>
+
+        <div style={{ marginTop: 24, textAlign: 'center' }}>
+          <BuyMeACoffee />
+        </div>
       </div>
     </div>
   );

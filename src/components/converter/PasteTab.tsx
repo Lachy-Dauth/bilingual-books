@@ -8,6 +8,7 @@ import { buildSimpleEpub, saveBlobAs } from '@/lib/converter/epub-build';
 import { countWords } from '@/lib/converter/util';
 import type { SentencePair } from '@/lib/converter/types';
 import { logConversion, precheck } from '@/lib/client/api';
+import { BuyMeACoffee } from '@/components/BuyMeACoffee';
 
 export function PasteTab() {
   const [sl, setSl] = useState('');
@@ -160,6 +161,7 @@ export function PasteTab() {
             <button type="button" className="cs-btn btn-secondary" onClick={onReset}>
               Start over
             </button>
+            <BuyMeACoffee label="Liked it? Buy me a coffee" />
           </>
         )}
       </div>

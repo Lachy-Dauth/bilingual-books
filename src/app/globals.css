@@ -477,3 +477,53 @@ body.bw .converter-shell input[type='text']:focus {
   color: var(--accent);
   text-decoration: none;
 }
+
+/* ============================================================
+   Site footer
+   ============================================================ */
+
+.site-content {
+  min-height: calc(100vh - 140px);
+}
+.site-footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 20px;
+  margin-top: 40px;
+}
+.site-footer .footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.site-footer .footer-tagline {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+/* BMC link works both inside and outside .converter-shell */
+.bmc-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffdd00;
+  color: #000;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #000;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+.bmc-link:hover {
+  opacity: 0.9;
+  text-decoration: none;
+  color: #000;
+}
