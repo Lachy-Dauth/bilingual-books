@@ -1,4 +1,10 @@
+import dns from 'node:dns';
 import nodemailer, { type Transporter } from 'nodemailer';
+
+// Railway's outbound IPv6 isn't routed, so SMTP hosts that resolve to AAAA
+// records (Gmail in particular) fail with ENETUNREACH. Tell Node to prefer
+// IPv4 addresses when both are available. Safe to do at module load.
+dns.setDefaultResultOrder('ipv4first');
 
 const host = process.env.SMTP_HOST || 'smtp.gmail.com';
 const port = Number(process.env.SMTP_PORT || 465);
@@ -15,10 +21,6 @@ const transporter: Transporter | null =
         port,
         secure: port === 465,
         auth: { user, pass },
-        // Railway's outbound IPv6 is not reachable, so SMTP hosts that
-        // resolve to AAAA records (Google in particular) fail with
-        // ENETUNREACH. Force IPv4-only resolution.
-        family: 4,
         // Don't let a misconfigured SMTP host hang the request indefinitely.
         connectionTimeout: 10_000,
         greetingTimeout: 10_000,
