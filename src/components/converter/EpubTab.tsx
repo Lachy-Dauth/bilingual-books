@@ -7,6 +7,7 @@ import { translateAll, type CancelSignal } from '@/lib/converter/translate';
 import { buildEpub, saveBlobAs } from '@/lib/converter/epub-build';
 import { countWords, slugify } from '@/lib/converter/util';
 import { expandParsed } from '@/lib/converter/expand';
+import { sentenceAlignParsed } from '@/lib/converter/align';
 import type { ParsedEpub, SplitMode, TranslationItem } from '@/lib/converter/types';
 import { logConversion, precheck } from '@/lib/client/api';
 import { BuyMeACoffee } from '@/components/BuyMeACoffee';
@@ -136,16 +137,24 @@ export function EpubTab({
     );
 
     const cancelled = cancelRef.current.cancelled;
-    setPhase(cancelled ? 'cancelled' : 'done');
     const elapsed = Date.now() - start;
 
-    const blob = await buildEpub(parsed, sourceLang, targetLang, titleOverride);
+    let finalParsed = parsed;
+    if (mode === 'sentence-aligned') {
+      finalParsed = sentenceAlignParsed(parsed);
+      setParsed(finalParsed);
+    }
+
+    setPhase(cancelled ? 'cancelled' : 'done');
+
+    const blob = await buildEpub(finalParsed, sourceLang, targetLang, titleOverride);
     const slug =
-      slugify(titleOverride || parsed.title || 'bilingual-book') || 'bilingual-book';
+      slugify(titleOverride || finalParsed.title || 'bilingual-book') ||
+      'bilingual-book';
     downloadRef.current = { blob, filename: `${slug}-${sourceLang}-${targetLang}.epub` };
 
     void logConversion({
-      bookTitle: titleOverride.trim() || parsed.title || 'Untitled',
+      bookTitle: titleOverride.trim() || finalParsed.title || 'Untitled',
       sourceLang,
       targetLang,
       wordCount: plannedWords,
@@ -208,7 +217,12 @@ export function EpubTab({
             ['Author', parsed.author || '—'],
             ['Detected language', parsed.language || '—'],
             ['Chapters', String(parsed.chapters.length)],
-            [mode === 'sentence' ? 'Sentences / headings' : 'Paragraphs / headings', String(totalBlocks)],
+            [
+              mode === 'sentence'
+                ? 'Sentences / headings'
+                : 'Paragraphs / headings',
+              String(totalBlocks),
+            ],
           ].map(([k, v]) => (
             <div className="info-row" key={k}>
               <span className="info-key">{k}</span>
@@ -225,6 +239,7 @@ export function EpubTab({
           className={mode === 'paragraph' ? 'active' : ''}
           onClick={() => setMode('paragraph')}
           disabled={phase === 'translating'}
+          title="Translate paragraph by paragraph and display the same way."
         >
           Paragraph
         </button>
@@ -233,8 +248,18 @@ export function EpubTab({
           className={mode === 'sentence' ? 'active' : ''}
           onClick={() => setMode('sentence')}
           disabled={phase === 'translating'}
+          title="Split into sentences first, then translate each sentence on its own (less context for the translator)."
         >
           Sentence
+        </button>
+        <button
+          type="button"
+          className={mode === 'sentence-aligned' ? 'active' : ''}
+          onClick={() => setMode('sentence-aligned')}
+          disabled={phase === 'translating'}
+          title="Translate paragraph by paragraph (full context), then split the result into aligned sentence pairs."
+        >
+          Sentence (aligned)
         </button>
       </div>
 

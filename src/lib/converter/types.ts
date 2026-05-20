@@ -7,7 +7,7 @@ export type Block = {
   paragraphEnd?: boolean;
 };
 
-export type SplitMode = 'paragraph' | 'sentence';
+export type SplitMode = 'paragraph' | 'sentence' | 'sentence-aligned';
 
 export type Chapter = {
   spineIndex: number;

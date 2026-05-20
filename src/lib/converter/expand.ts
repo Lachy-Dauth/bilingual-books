@@ -10,7 +10,9 @@ import type { Block, Chapter, ParsedEpub, SplitMode } from './types';
  *   each original paragraph.
  */
 export function expandBlocks(blocks: Block[], mode: SplitMode): Block[] {
-  if (mode === 'paragraph') return blocks;
+  // 'sentence-aligned' translates paragraph-level then splits AFTER translation,
+  // so for the translation pipeline it behaves like paragraph mode.
+  if (mode === 'paragraph' || mode === 'sentence-aligned') return blocks;
   return blocks.flatMap((b) => {
     if (/^h[1-6]$/.test(b.tag)) return [b];
     const sentences = splitSentences(b.text);
@@ -24,7 +26,7 @@ export function expandBlocks(blocks: Block[], mode: SplitMode): Block[] {
 }
 
 export function expandChapters(chapters: Chapter[], mode: SplitMode): Chapter[] {
-  if (mode === 'paragraph') return chapters;
+  if (mode === 'paragraph' || mode === 'sentence-aligned') return chapters;
   return chapters.map((ch) => ({
     ...ch,
     blocks: expandBlocks(ch.blocks, mode),
