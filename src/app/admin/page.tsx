@@ -1,10 +1,12 @@
 import { getSiteStats } from '@/lib/stats';
+import { requireAdmin } from '@/lib/auth-helpers';
 import { StatsCards } from '@/components/dashboard/StatsCards';
+import { EmailDiagnostics } from '@/components/admin/EmailDiagnostics';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminOverviewPage() {
-  const stats = await getSiteStats();
+  const [stats, admin] = await Promise.all([getSiteStats(), requireAdmin()]);
   const topPair = stats.topLangPairs[0];
 
   return (
@@ -58,6 +60,10 @@ export default async function AdminOverviewPage() {
             )}
           </ul>
         </div>
+      </section>
+
+      <section className="mt-8">
+        <EmailDiagnostics defaultTo={admin.email} />
       </section>
     </>
   );

@@ -28,6 +28,47 @@ export type SendEmailOptions = {
   html: string;
 };
 
+export type EmailConfigStatus = {
+  configured: boolean;
+  host: string;
+  port: number;
+  user: string | null;
+  from: string;
+};
+
+export function getEmailConfig(): EmailConfigStatus {
+  return {
+    configured: Boolean(transporter),
+    host,
+    port,
+    user: user ?? null,
+    from,
+  };
+}
+
+/**
+ * Connect to the SMTP server and verify auth without sending anything.
+ * Returns a structured result so admin diagnostics can show what went wrong.
+ */
+export async function verifyEmailTransport(): Promise<
+  | { ok: true }
+  | { ok: false; reason: 'not-configured' | 'verify-failed'; error?: string }
+> {
+  if (!transporter) {
+    return { ok: false, reason: 'not-configured' };
+  }
+  try {
+    await transporter.verify();
+    return { ok: true };
+  } catch (err) {
+    return {
+      ok: false,
+      reason: 'verify-failed',
+      error: (err as Error).message,
+    };
+  }
+}
+
 /**
  * Send a transactional email via SMTP (Gmail by default).
  *
