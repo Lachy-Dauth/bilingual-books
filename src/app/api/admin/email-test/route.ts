@@ -8,7 +8,7 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-/** Returns the resolved SMTP config (without exposing the password). */
+/** Returns the resolved Gmail OAuth config (without exposing secrets). */
 export async function GET() {
   await requireAdmin();
   const config = getEmailConfig();
@@ -17,8 +17,9 @@ export async function GET() {
 }
 
 /**
- * Sends a real test email so you can confirm the credentials work
- * end-to-end. Body: { to?: string } — defaults to the admin's own email.
+ * Sends a real test email via the Gmail API so an admin can confirm the
+ * OAuth credentials work end-to-end. Body: { to?: string } — defaults to
+ * the admin's own email.
  */
 export async function POST(req: Request) {
   const admin = await requireAdmin();
@@ -38,7 +39,7 @@ export async function POST(req: Request) {
       {
         stage: 'config',
         error:
-          'SMTP_USER / SMTP_PASS are not set in the environment. The server will only log reset emails.',
+          'Gmail OAuth is not configured. Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GMAIL_REFRESH_TOKEN. Without them, email is only logged to the server.',
         config,
       },
       { status: 500 },
@@ -56,8 +57,8 @@ export async function POST(req: Request) {
   try {
     await sendEmail({
       to,
-      subject: 'Bilingual Books — SMTP test',
-      html: `<p>This is a test email from your <code>/admin</code> page. If you're reading it, SMTP is configured correctly.</p>
+      subject: 'Bilingual Books — Gmail API test',
+      html: `<p>This is a test email from your <code>/admin</code> page. If you're reading it, the Gmail API transport is configured correctly.</p>
 <p>Sent at ${new Date().toISOString()}.</p>`,
     });
     return NextResponse.json({ ok: true, to, config });

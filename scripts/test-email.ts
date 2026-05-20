@@ -7,20 +7,15 @@
  *      GMAIL_REFRESH_TOKEN (same values you'd set in Railway).
  *   2. Run:  npm run email:test -- recipient@example.com
  *
- * The script loads env, prints the resolved config, runs the same
- * verify() the /admin/email-test panel uses (refreshes an access token
- * against Google's OAuth endpoint), then sends a real test message via
- * the Gmail API.
+ * NOTE: src/lib/email reads env vars at module init. ESM hoists static
+ * imports, so we *must* dynamic-import the email module from inside
+ * main() — AFTER loadEnv() runs — otherwise the email module sees an
+ * empty process.env and reports "not configured" even when .env.local
+ * is populated.
  */
 import { config as loadEnv } from 'dotenv';
 loadEnv({ path: '.env.local', quiet: true });
 loadEnv({ quiet: true });
-
-import {
-  getEmailConfig,
-  sendEmail,
-  verifyEmailTransport,
-} from '../src/lib/email';
 
 async function main() {
   const to = process.argv[2];
@@ -35,6 +30,12 @@ async function main() {
     console.error('  GMAIL_SEND_FROM        Default bilingualbooksgen@gmail.com');
     process.exit(1);
   }
+
+  // Dynamic import so env vars from .env.local are already in process.env
+  // by the time src/lib/email reads them at module init.
+  const { getEmailConfig, sendEmail, verifyEmailTransport } = await import(
+    '../src/lib/email'
+  );
 
   const config = getEmailConfig();
   console.log('\nResolved email config:');

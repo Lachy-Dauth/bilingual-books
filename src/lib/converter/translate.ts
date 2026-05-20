@@ -10,9 +10,16 @@ function splitForTranslation(text: string, limit: number): string[] {
   while (remaining.length > limit) {
     let cut = remaining.lastIndexOf('. ', limit);
     if (cut < limit / 2) cut = remaining.lastIndexOf(' ', limit);
-    if (cut <= 0) cut = limit;
-    out.push(remaining.slice(0, cut + 1).trim());
-    remaining = remaining.slice(cut + 1);
+    if (cut <= 0) {
+      // No usable delimiter — hard-cut at `limit` exactly. The `+ 1`
+      // below is only safe when `cut` points at a real delimiter we
+      // want to include in the chunk.
+      out.push(remaining.slice(0, limit).trim());
+      remaining = remaining.slice(limit);
+    } else {
+      out.push(remaining.slice(0, cut + 1).trim());
+      remaining = remaining.slice(cut + 1);
+    }
   }
   if (remaining) out.push(remaining);
   return out;
