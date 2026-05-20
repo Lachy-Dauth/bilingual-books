@@ -5,7 +5,6 @@ import { PasteTab } from './PasteTab';
 import { EpubTab } from './EpubTab';
 import { GutenbergTab } from './GutenbergTab';
 import { PopularTab } from './PopularTab';
-import { ThemeToggle } from './ThemeToggle';
 import { InfoModal } from './InfoModal';
 
 type Tab = 'text' | 'epub' | 'popular' | 'gutenberg';
@@ -61,10 +60,6 @@ export function ConverterShell() {
         </div>
         <div hidden={tab !== 'gutenberg'}>
           <GutenbergTab />
-        </div>
-
-        <div className="actions" style={{ marginTop: 20 }}>
-          <ThemeToggle />
         </div>
       </div>
 

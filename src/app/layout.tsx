@@ -4,6 +4,8 @@ import { Footer } from '@/components/Footer';
 import { ConsentProvider } from '@/components/consent/ConsentProvider';
 import { Analytics } from '@/components/consent/Analytics';
 import { ConsentBanner } from '@/components/consent/ConsentBanner';
+import { ThemeProvider } from '@/components/theme/ThemeProvider';
+import { ThemeScript } from '@/components/theme/ThemeScript';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -21,14 +23,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <ThemeScript />
+      </head>
       <body>
-        <ConsentProvider>
-          <Analytics gaId={GA_ID} />
-          <Navbar />
-          <div className="site-content">{children}</div>
-          <Footer />
-          <ConsentBanner />
-        </ConsentProvider>
+        <ThemeProvider>
+          <ConsentProvider>
+            <Analytics gaId={GA_ID} />
+            <Navbar />
+            <div className="site-content">{children}</div>
+            <Footer />
+            <ConsentBanner />
+          </ConsentProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

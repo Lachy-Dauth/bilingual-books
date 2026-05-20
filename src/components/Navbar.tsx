@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getSession } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/db';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 export async function Navbar() {
   const session = await getSession();
@@ -36,6 +37,7 @@ export async function Navbar() {
               <Link href="/sign-up">Sign up</Link>
             </>
           )}
+          <ThemeToggle />
         </div>
       </div>
     </nav>

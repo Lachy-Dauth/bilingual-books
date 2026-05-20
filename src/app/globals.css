@@ -14,7 +14,7 @@
   --shadow: 0 2px 8px rgba(53, 39, 0, 0.08);
 }
 
-body.bw {
+html.theme-light {
   --bg: #ffffff;
   --surface: #f7f7f7;
   --text: #111111;
@@ -23,6 +23,20 @@ body.bw {
   --accent-hover: #000000;
   --border: rgba(0, 0, 0, 0.15);
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+html.theme-dark {
+  --bg: #0f1115;
+  --surface: #1b1e25;
+  --text: #e6e6e6;
+  --muted: #9aa0aa;
+  --accent: rgb(214, 156, 86);
+  --accent-hover: rgb(232, 178, 112);
+  --border: rgba(255, 255, 255, 0.12);
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+}
+html.theme-dark body {
+  color-scheme: dark;
 }
 
 html,
@@ -257,8 +271,8 @@ a:hover {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(140, 82, 20, 0.18);
 }
-body.bw .converter-shell textarea:focus,
-body.bw .converter-shell input[type='text']:focus {
+html.theme-light .converter-shell textarea:focus,
+html.theme-light .converter-shell input[type='text']:focus {
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.15);
 }
 
@@ -308,7 +322,7 @@ body.bw .converter-shell input[type='text']:focus {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-body.bw .converter-shell .lang-combo-pill {
+html.theme-light .converter-shell .lang-combo-pill {
   background: rgba(0, 0, 0, 0.08);
 }
 .converter-shell .lang-combo-list {
@@ -749,6 +763,40 @@ body.bw .converter-shell .lang-combo-pill {
   text-decoration: none;
 }
 
+/* Theme toggle in the navbar */
+.theme-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px;
+  gap: 2px;
+  background: var(--bg);
+  margin-left: 4px;
+}
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 0;
+}
+.theme-toggle-btn:hover {
+  color: var(--accent);
+}
+.theme-toggle-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+html.theme-dark .theme-toggle-btn.active {
+  color: #1b1e25;
+}
+
 /* ============================================================
    Site footer
    ============================================================ */
@@ -862,7 +910,7 @@ body.bw .converter-shell .lang-combo-pill {
 .consent-banner-btn-secondary:hover {
   background: rgba(140, 82, 20, 0.08);
 }
-body.bw .consent-banner-btn-secondary:hover {
+html.theme-light .consent-banner-btn-secondary:hover {
   background: rgba(0, 0, 0, 0.06);
 }
 
