@@ -11,6 +11,7 @@ import { logConversion, precheck } from '@/lib/client/api';
 import { BuyMeACoffee } from '@/components/BuyMeACoffee';
 import { DownloadBar } from './DownloadBar';
 import { LanguageInput } from './LanguageInput';
+import { SaveAsPdfButton } from './SaveAsPdfButton';
 
 export function PasteTab() {
   const [sl, setSl] = useState('');
@@ -97,6 +98,7 @@ export function PasteTab() {
           <button type="button" className="cs-btn" onClick={onDownload}>
             Download EPUB
           </button>
+          <SaveAsPdfButton />
           <button type="button" className="cs-btn btn-secondary" onClick={onReset}>
             Start over
           </button>

@@ -877,6 +877,111 @@ body.bw .consent-banner-btn-secondary:hover {
   text-decoration: underline;
 }
 
+/* ============================================================
+   Print stylesheet — used by the "Save as PDF" button which calls
+   window.print(). Hides every UI chrome / control, shows only the
+   bilingual output with proper page breaks.
+   ============================================================ */
+@media print {
+  /* Force a clean white background everywhere */
+  html,
+  body,
+  .site-content,
+  .converter-shell,
+  .converter-shell .container {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    min-height: 0 !important;
+  }
+  body {
+    display: block !important;
+  }
+
+  /* Hide every navigation / form / banner element */
+  .site-nav,
+  .site-footer,
+  .consent-banner,
+  .info-modal,
+  .converter-shell .cs-header,
+  .converter-shell .tabs,
+  .converter-shell .lang-row,
+  .converter-shell .lang-combo,
+  .converter-shell .segmented,
+  .converter-shell .field-label,
+  .converter-shell .field-hint,
+  .converter-shell .book-title-input,
+  .converter-shell .epub-info,
+  .converter-shell .epub-status,
+  .converter-shell .epub-progress,
+  .converter-shell .gutenberg-results,
+  .converter-shell .actions,
+  .converter-shell .download-bar,
+  .converter-shell input,
+  .converter-shell textarea {
+    display: none !important;
+  }
+
+  /* Chapter starts on a new page (except the first) */
+  .converter-shell .chapter {
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    page-break-before: always;
+    break-before: page;
+  }
+  .converter-shell .chapter:first-of-type {
+    page-break-before: auto;
+    break-before: auto;
+  }
+
+  .converter-shell .chapter-title-display {
+    text-align: center;
+    font-size: 1.3rem !important;
+    color: #000 !important;
+    text-transform: none;
+    letter-spacing: 0;
+    padding: 0 0 1em !important;
+    margin: 0 !important;
+  }
+
+  /* Each pair becomes a side-by-side table row, never split across pages */
+  .converter-shell .paragraph {
+    display: table !important;
+    width: 100% !important;
+    margin: 0 0 0.4em !important;
+    padding: 0 !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .converter-shell .paragraph .source,
+  .converter-shell .paragraph .english {
+    display: table-cell !important;
+    width: 50% !important;
+    vertical-align: top !important;
+    padding: 0.25em 0.6em !important;
+    flex: none !important;
+  }
+  .converter-shell .paragraph .source {
+    border-right: 1px solid #aaa !important;
+  }
+  .converter-shell .paragraph.paragraph-end {
+    margin-bottom: 1.4em !important;
+    padding-bottom: 0 !important;
+  }
+  .converter-shell .paragraph.is-heading .source,
+  .converter-shell .paragraph.is-heading .english {
+    font-weight: bold !important;
+    font-size: 1.05em !important;
+  }
+
+  @page {
+    margin: 1.5cm 1.25cm;
+  }
+}
+
 /* BMC link works both inside and outside .converter-shell */
 .bmc-link {
   display: inline-flex;

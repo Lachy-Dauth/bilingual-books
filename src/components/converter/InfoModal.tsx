@@ -52,9 +52,10 @@ export function InfoModal({ open, onClose }: { open: boolean; onClose: () => voi
         </p>
         <h2>Saving as PDF</h2>
         <p>
-          If you&apos;d rather have a PDF, once the bilingual book is on screen press{' '}
-          <kbd>Ctrl + P</kbd> (Windows) or <kbd>Command + P</kbd> (Mac), choose{' '}
-          <em>Save as PDF</em>, and set margins to 0 for the cleanest layout.
+          When the bilingual book is on screen, click <em>Save as PDF</em> in
+          the bar at the top. Your browser&apos;s print dialog opens with the
+          layout already stripped of UI chrome — pick{' '}
+          <em>Save as PDF</em> as the destination and confirm.
         </p>
 
         <div style={{ marginTop: 24, textAlign: 'center' }}>

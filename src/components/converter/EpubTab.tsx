@@ -19,6 +19,7 @@ import { BuyMeACoffee } from '@/components/BuyMeACoffee';
 import { DownloadBar } from './DownloadBar';
 import { LanguageInput } from './LanguageInput';
 import { HelpTip } from './HelpTip';
+import { SaveAsPdfButton } from './SaveAsPdfButton';
 
 type Phase = 'idle' | 'parsed' | 'translating' | 'done' | 'cancelled';
 
@@ -195,6 +196,7 @@ export function EpubTab({
           <button type="button" className="cs-btn" onClick={onDownload}>
             Download EPUB
           </button>
+          <SaveAsPdfButton />
           <BuyMeACoffee label="Liked it? Buy me a coffee" />
         </DownloadBar>
       )}
