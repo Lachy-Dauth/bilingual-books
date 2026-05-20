@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getSession } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/db';
-import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { NavLinks } from './NavLinks';
 
 export async function Navbar() {
   const session = await getSession();
@@ -22,23 +22,11 @@ export async function Navbar() {
         <Link href="/" className="nav-brand">
           Bilingual Books
         </Link>
-        <div className="nav-links">
-          <Link href="/">Convert</Link>
-          {session?.user ? (
-            <>
-              <Link href="/dashboard">Dashboard</Link>
-              {isAdmin && <Link href="/admin">Admin</Link>}
-              <span style={{ color: 'var(--muted)' }}>{userLabel}</span>
-              <Link href="/sign-out">Sign out</Link>
-            </>
-          ) : (
-            <>
-              <Link href="/sign-in">Sign in</Link>
-              <Link href="/sign-up">Sign up</Link>
-            </>
-          )}
-          <ThemeToggle />
-        </div>
+        <NavLinks
+          signedIn={!!session?.user}
+          isAdmin={isAdmin}
+          userLabel={userLabel}
+        />
       </div>
     </nav>
   );
