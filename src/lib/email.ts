@@ -1,9 +1,9 @@
 import dns from 'node:dns';
+import { promises as dnsP } from 'node:dns';
 import nodemailer, { type Transporter } from 'nodemailer';
 
-// Railway's outbound IPv6 isn't routed, so SMTP hosts that resolve to AAAA
-// records (Gmail in particular) fail with ENETUNREACH. Tell Node to prefer
-// IPv4 addresses when both are available. Safe to do at module load.
+// Belt: tell Node to prefer IPv4 records in case the explicit resolve below
+// is bypassed by anything.
 dns.setDefaultResultOrder('ipv4first');
 
 const host = process.env.SMTP_HOST || 'smtp.gmail.com';
@@ -14,19 +14,50 @@ const from =
   process.env.SMTP_FROM ||
   (user ? `Bilingual Books <${user}>` : 'Bilingual Books');
 
-const transporter: Transporter | null =
-  user && pass
-    ? nodemailer.createTransport({
-        host,
-        port,
-        secure: port === 465,
-        auth: { user, pass },
-        // Don't let a misconfigured SMTP host hang the request indefinitely.
-        connectionTimeout: 10_000,
-        greetingTimeout: 10_000,
-        socketTimeout: 15_000,
-      })
-    : null;
+// Lazily resolve the SMTP host to an IPv4 address the first time we need it
+// (Railway's outbound IPv6 isn't routed; Gmail's AAAA records would cause
+// ENETUNREACH). Cached for the process lifetime.
+let cachedTransporter: Transporter | null | undefined;
+let initPromise: Promise<Transporter | null> | null = null;
+
+function buildTransporter(connectHost: string): Transporter {
+  return nodemailer.createTransport({
+    host: connectHost,
+    port,
+    secure: port === 465,
+    auth: { user, pass },
+    // Cert is issued for the hostname, not the IP we're connecting to.
+    tls: { servername: host },
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 15_000,
+  });
+}
+
+async function getTransporter(): Promise<Transporter | null> {
+  if (cachedTransporter !== undefined) return cachedTransporter;
+  if (initPromise) return initPromise;
+  if (!user || !pass) {
+    cachedTransporter = null;
+    return null;
+  }
+  initPromise = (async () => {
+    let connectHost = host;
+    try {
+      const { address } = await dnsP.lookup(host, { family: 4 });
+      connectHost = address;
+      console.log(`[email] Resolved ${host} → ${address} (forcing IPv4)`);
+    } catch (err) {
+      console.warn(
+        `[email] IPv4 lookup failed for ${host}, falling back to hostname:`,
+        (err as Error).message,
+      );
+    }
+    cachedTransporter = buildTransporter(connectHost);
+    return cachedTransporter;
+  })();
+  return initPromise;
+}
 
 export type SendEmailOptions = {
   to: string;
@@ -44,7 +75,7 @@ export type EmailConfigStatus = {
 
 export function getEmailConfig(): EmailConfigStatus {
   return {
-    configured: Boolean(transporter),
+    configured: Boolean(user && pass),
     host,
     port,
     user: user ?? null,
@@ -52,19 +83,14 @@ export function getEmailConfig(): EmailConfigStatus {
   };
 }
 
-/**
- * Connect to the SMTP server and verify auth without sending anything.
- * Returns a structured result so admin diagnostics can show what went wrong.
- */
 export async function verifyEmailTransport(): Promise<
   | { ok: true }
   | { ok: false; reason: 'not-configured' | 'verify-failed'; error?: string }
 > {
-  if (!transporter) {
-    return { ok: false, reason: 'not-configured' };
-  }
+  const t = await getTransporter();
+  if (!t) return { ok: false, reason: 'not-configured' };
   try {
-    await transporter.verify();
+    await t.verify();
     return { ok: true };
   } catch (err) {
     return {
@@ -75,22 +101,16 @@ export async function verifyEmailTransport(): Promise<
   }
 }
 
-/**
- * Send a transactional email via SMTP (Gmail by default).
- *
- * When SMTP_USER / SMTP_PASS aren't set, the helper logs the message
- * instead of sending — local dev and first-time deploys keep working
- * without credentials.
- */
 export async function sendEmail(opts: SendEmailOptions): Promise<void> {
-  if (!transporter) {
+  const t = await getTransporter();
+  if (!t) {
     console.warn(
       `[email] SMTP credentials missing. Would have sent to ${opts.to}: "${opts.subject}"`,
     );
     return;
   }
   try {
-    await transporter.sendMail({
+    await t.sendMail({
       from,
       to: opts.to,
       subject: opts.subject,
@@ -102,8 +122,6 @@ export async function sendEmail(opts: SendEmailOptions): Promise<void> {
   }
 }
 
-/** HTML body for the password-reset email. Inline styles since email clients
- *  do not honor external stylesheets. */
 export function passwordResetHtml(url: string): string {
   return `<!doctype html>
 <html lang="en">
