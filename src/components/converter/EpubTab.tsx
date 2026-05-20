@@ -44,7 +44,9 @@ export function EpubTab({
   const [limitMsg, setLimitMsg] = useState<string | null>(null);
   const [hasOutput, setHasOutput] = useState(false);
   const cancelRef = useRef<CancelSignal>({ cancelled: false });
-  const downloadRef = useRef<{ blob: Blob; filename: string } | null>(null);
+  const [download, setDownload] = useState<{ blob: Blob; filename: string } | null>(
+    null,
+  );
 
   async function handleFile(buf: ArrayBuffer, fallbackTitle: string) {
     setStatus('Reading EPUB…');
@@ -57,7 +59,7 @@ export function EpubTab({
       setStatus(`Loaded: ${p.chapters.length} chapters, ${totalBlocks} blocks.`);
       setPhase('parsed');
       setHasOutput(false);
-      downloadRef.current = null;
+      setDownload(null);
       setSl((cur) => cur || (p.language ? normalizeLanguageCode(p.language) : cur));
       setTitleOverride((cur) => cur || p.title || fallbackTitle);
     } catch (err) {
@@ -82,7 +84,7 @@ export function EpubTab({
     if (phase === 'translating') return;
     setParsed(expandParsed(rawParsed, mode, collapseBreaks));
     setHasOutput(false);
-    downloadRef.current = null;
+    setDownload(null);
     setPhase(rawParsed ? 'parsed' : 'idle');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, collapseBreaks]);
@@ -155,13 +157,12 @@ export function EpubTab({
       setParsed(finalParsed);
     }
 
-    setPhase(cancelled ? 'cancelled' : 'done');
-
     const blob = await buildEpub(finalParsed, sourceLang, targetLang, titleOverride);
     const slug =
       slugify(titleOverride || finalParsed.title || 'bilingual-book') ||
       'bilingual-book';
-    downloadRef.current = { blob, filename: `${slug}-${sourceLang}-${targetLang}.epub` };
+    setDownload({ blob, filename: `${slug}-${sourceLang}-${targetLang}.epub` });
+    setPhase(cancelled ? 'cancelled' : 'done');
 
     void logConversion({
       bookTitle: titleOverride.trim() || finalParsed.title || 'Untitled',
@@ -180,12 +181,12 @@ export function EpubTab({
   }
 
   function onDownload() {
-    if (downloadRef.current) saveBlobAs(downloadRef.current.blob, downloadRef.current.filename);
+    if (download) saveBlobAs(download.blob, download.filename);
   }
 
   const totalBlocks = parsed?.chapters.reduce((s, c) => s + c.blocks.length, 0) ?? 0;
   const downloadReady =
-    (phase === 'done' || phase === 'cancelled') && downloadRef.current;
+    (phase === 'done' || phase === 'cancelled') && download !== null;
 
   return (
     <>
