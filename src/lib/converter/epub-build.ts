@@ -78,7 +78,7 @@ export async function buildEpub(
   const title =
     (userTitle ?? '').trim() ||
     parsed.title ||
-    `Bilingual Book (${sourceLang} → ${targetLang})`;
+    `Bilingual Book (${sourceLang} to ${targetLang})`;
   const bookId = `urn:uuid:${uuid()}`;
   const srcDir = isRtl(sourceLang) ? 'rtl' : 'ltr';
   const tgtDir = isRtl(targetLang) ? 'rtl' : 'ltr';
@@ -106,7 +106,7 @@ export async function buildEpub(
     ${coverHref ? `<img src="${escapeXml(coverHref)}" alt="${escapeXml(title)}"/>` : ''}
     <h1>${escapeXml(title)}</h1>
     ${parsed.author ? `<p class="author">${escapeXml(parsed.author)}</p>` : ''}
-    <p class="edition">Bilingual edition: ${escapeXml(sourceLang)} → ${escapeXml(targetLang)}</p>
+    <p class="edition">Bilingual edition: ${escapeXml(sourceLang)} to ${escapeXml(targetLang)}</p>
   </div>
 </body>
 </html>`;
@@ -217,7 +217,7 @@ export async function buildSimpleEpub(
 ): Promise<{ blob: Blob; filename: string }> {
   const title =
     (userTitle ?? '').trim() ||
-    `Bilingual Book (${sourceLang} → ${targetLang})`;
+    `Bilingual Book (${sourceLang} to ${targetLang})`;
 
   const blocks: Block[] = pairs
     .filter((p) => p.src || p.tgt)

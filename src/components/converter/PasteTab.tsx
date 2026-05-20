@@ -60,7 +60,7 @@ export function PasteTab() {
     setDone(true);
 
     void logConversion({
-      bookTitle: bookTitle.trim() || `Bilingual (${sourceLang} → ${targetLang})`,
+      bookTitle: bookTitle.trim() || `Bilingual (${sourceLang} to ${targetLang})`,
       sourceLang,
       targetLang,
       wordCount: plannedWords,
