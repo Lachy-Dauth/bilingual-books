@@ -10,6 +10,7 @@ import type { SentencePair } from '@/lib/converter/types';
 import { logConversion, precheck } from '@/lib/client/api';
 import { BuyMeACoffee } from '@/components/BuyMeACoffee';
 import { DownloadBar } from './DownloadBar';
+import { LanguageInput } from './LanguageInput';
 
 export function PasteTab() {
   const [sl, setSl] = useState('');
@@ -114,23 +115,13 @@ export function PasteTab() {
           <label className="field-label" htmlFor="paste-sl">
             Source language
           </label>
-          <textarea
-            id="paste-sl"
-            value={sl}
-            onChange={(e) => setSl(e.target.value)}
-            placeholder="e.g. fr"
-          />
+          <LanguageInput id="paste-sl" value={sl} onChange={setSl} placeholder="e.g. fr" />
         </div>
         <div>
           <label className="field-label" htmlFor="paste-tl">
             Target language
           </label>
-          <textarea
-            id="paste-tl"
-            value={tl}
-            onChange={(e) => setTl(e.target.value)}
-            placeholder="e.g. en"
-          />
+          <LanguageInput id="paste-tl" value={tl} onChange={setTl} placeholder="e.g. en" />
         </div>
       </div>
 

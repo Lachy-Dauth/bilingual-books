@@ -12,6 +12,8 @@ import type { ParsedEpub, SplitMode, TranslationItem } from '@/lib/converter/typ
 import { logConversion, precheck } from '@/lib/client/api';
 import { BuyMeACoffee } from '@/components/BuyMeACoffee';
 import { DownloadBar } from './DownloadBar';
+import { LanguageInput } from './LanguageInput';
+import { HelpTip } from './HelpTip';
 
 type Phase = 'idle' | 'parsed' | 'translating' | 'done' | 'cancelled';
 
@@ -233,7 +235,29 @@ export function EpubTab({
         </div>
       )}
 
-      <label className="field-label">Split translation by</label>
+      <label className="field-label">
+        Split translation by
+        <HelpTip>
+          <p>
+            <strong>Paragraph</strong> &mdash; translate each paragraph as one
+            block and display the same way. Fastest, fewest API calls.
+          </p>
+          <p>
+            <strong>Sentence</strong> &mdash; split every paragraph into
+            sentences first, then translate each sentence on its own. The
+            translator has less context, so pronouns and references can drift,
+            but every row is exactly one source sentence next to its
+            translation.
+          </p>
+          <p>
+            <strong>Sentence (aligned)</strong> &mdash; translate each
+            paragraph as a single chunk (full context), then split both the
+            source and the translation back into sentences and pair them up
+            proportionally. Best of both: paragraph-level translation quality
+            with sentence-level visual alignment.
+          </p>
+        </HelpTip>
+      </label>
       <div className="segmented" role="tablist" aria-label="Split mode">
         <button
           type="button"
@@ -264,7 +288,22 @@ export function EpubTab({
         </button>
       </div>
 
-      <label className="field-label">Line breaks (&lt;br&gt;)</label>
+      <label className="field-label">
+        Line breaks (&lt;br&gt;)
+        <HelpTip>
+          <p>
+            <strong>Preserve</strong> &mdash; treat each <code>&lt;br&gt;</code>
+            -separated line as its own translation pair. Good for poetry,
+            slogans, or any text where the line breaks carry meaning.
+          </p>
+          <p>
+            <strong>Collapse</strong> &mdash; ignore <code>&lt;br&gt;</code>{' '}
+            inside paragraphs; the whole paragraph becomes one chunk. Useful
+            for EPUBs that use <code>&lt;br&gt;</code> for visual line-wrap
+            inside what is logically one paragraph.
+          </p>
+        </HelpTip>
+      </label>
       <div className="segmented" role="tablist" aria-label="Line break handling">
         <button
           type="button"
@@ -291,23 +330,13 @@ export function EpubTab({
           <label className="field-label" htmlFor="epub-sl">
             Source language
           </label>
-          <textarea
-            id="epub-sl"
-            value={sl}
-            onChange={(e) => setSl(e.target.value)}
-            placeholder="e.g. en"
-          />
+          <LanguageInput id="epub-sl" value={sl} onChange={setSl} placeholder="e.g. en" />
         </div>
         <div>
           <label className="field-label" htmlFor="epub-tl">
             Target language
           </label>
-          <textarea
-            id="epub-tl"
-            value={tl}
-            onChange={(e) => setTl(e.target.value)}
-            placeholder="e.g. fr"
-          />
+          <LanguageInput id="epub-tl" value={tl} onChange={setTl} placeholder="e.g. fr" />
         </div>
       </div>
 

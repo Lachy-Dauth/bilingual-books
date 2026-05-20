@@ -6,6 +6,7 @@ import { EpubTab } from './EpubTab';
 import { GutenbergTab } from './GutenbergTab';
 import { ThemeToggle } from './ThemeToggle';
 import { InfoModal } from './InfoModal';
+import { LanguageDatalist } from './LanguageInput';
 
 type Tab = 'text' | 'epub' | 'gutenberg';
 
@@ -57,6 +58,7 @@ export function ConverterShell() {
       </div>
 
       <InfoModal open={infoOpen} onClose={() => setInfoOpen(false)} />
+      <LanguageDatalist />
     </div>
   );
 }

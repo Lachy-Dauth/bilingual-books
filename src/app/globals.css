@@ -136,6 +136,68 @@ a:hover {
   color: var(--accent);
 }
 
+/* Help icon next to a field label, with hover/focus tooltip */
+.converter-shell .help-tip {
+  position: relative;
+  display: inline-block;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.converter-shell .help-tip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: serif;
+  cursor: help;
+  user-select: none;
+}
+.converter-shell .help-tip-icon:hover,
+.converter-shell .help-tip:focus-within .help-tip-icon {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.converter-shell .help-tip-panel {
+  position: absolute;
+  display: none;
+  top: 24px;
+  left: -8px;
+  width: 340px;
+  max-width: 90vw;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  box-shadow: var(--shadow);
+  z-index: 20;
+  font-size: 0.85rem;
+  color: var(--text);
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  line-height: 1.45;
+}
+.converter-shell .help-tip:hover .help-tip-panel,
+.converter-shell .help-tip:focus-within .help-tip-panel {
+  display: block;
+}
+.converter-shell .help-tip-panel p {
+  margin: 0 0 8px;
+}
+.converter-shell .help-tip-panel p:last-child {
+  margin-bottom: 0;
+}
+.converter-shell .help-tip-panel strong {
+  color: var(--accent);
+}
+
 .converter-shell textarea,
 .converter-shell input[type='text'] {
   width: 100%;
@@ -161,7 +223,8 @@ body.bw .converter-shell input[type='text']:focus {
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.15);
 }
 
-.converter-shell .lang-row textarea {
+.converter-shell .lang-row textarea,
+.converter-shell .lang-row input[type='text'] {
   height: 44px;
   resize: none;
 }
