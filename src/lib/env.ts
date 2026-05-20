@@ -34,12 +34,8 @@ const RECOMMENDED: EnvSpec[] = [
   { name: 'ADMIN_EMAIL', hint: 'Email for the seeded admin account.' },
   { name: 'ADMIN_PASSWORD', hint: 'Password for the seeded admin account.' },
   {
-    name: 'SMTP_USER',
-    hint: 'SMTP username (full Gmail address). Required to actually send password-reset emails.',
-  },
-  {
-    name: 'SMTP_PASS',
-    hint: 'SMTP password — for Gmail this is a 16-char App Password from https://myaccount.google.com/apppasswords (2-Step Verification must be on).',
+    name: 'GMAIL_REFRESH_TOKEN',
+    hint: 'Gmail OAuth refresh token for sending password-reset emails via Gmail API. Generate with `npm run gmail:get-token`. Without it, reset links are only logged (visible in `railway logs`).',
   },
 ];
 

@@ -1,62 +1,88 @@
-import dns from 'node:dns';
-import { promises as dnsP } from 'node:dns';
-import nodemailer, { type Transporter } from 'nodemailer';
+/**
+ * Gmail-API-over-HTTPS email transport. No nodemailer, no SMTP, no port 465
+ * or 587 — Railway can't open outbound SMTP, but it can absolutely open
+ * outbound HTTPS to gmail.googleapis.com.
+ *
+ * Auth flow:
+ *   1. Reuse GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET (already configured
+ *      for Sign-in-with-Google).
+ *   2. Run `npm run gmail:get-token` locally once to mint a refresh token
+ *      scoped to `gmail.send` for bilingualbooksgen@gmail.com.
+ *   3. Paste the refresh token into Railway as GMAIL_REFRESH_TOKEN.
+ *
+ * On send, this module exchanges the refresh token for a short-lived
+ * access token (cached in-process until it expires), then POSTs the
+ * RFC 2822 MIME message base64url-encoded to the Gmail API.
+ */
 
-// Belt: tell Node to prefer IPv4 records in case the explicit resolve below
-// is bypassed by anything.
-dns.setDefaultResultOrder('ipv4first');
+const clientId = process.env.GOOGLE_CLIENT_ID;
+const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+const refreshToken = process.env.GMAIL_REFRESH_TOKEN;
+const sendFromAddress =
+  process.env.GMAIL_SEND_FROM || 'bilingualbooksgen@gmail.com';
+const from = `Bilingual Books <${sendFromAddress}>`;
 
-const host = process.env.SMTP_HOST || 'smtp.gmail.com';
-const port = Number(process.env.SMTP_PORT || 465);
-const user = process.env.SMTP_USER;
-const pass = process.env.SMTP_PASS;
-const from =
-  process.env.SMTP_FROM ||
-  (user ? `Bilingual Books <${user}>` : 'Bilingual Books');
+const configured = Boolean(clientId && clientSecret && refreshToken);
 
-// Lazily resolve the SMTP host to an IPv4 address the first time we need it
-// (Railway's outbound IPv6 isn't routed; Gmail's AAAA records would cause
-// ENETUNREACH). Cached for the process lifetime.
-let cachedTransporter: Transporter | null | undefined;
-let initPromise: Promise<Transporter | null> | null = null;
+let cachedToken: { value: string; expiresAt: number } | null = null;
 
-function buildTransporter(connectHost: string): Transporter {
-  return nodemailer.createTransport({
-    host: connectHost,
-    port,
-    secure: port === 465,
-    auth: { user, pass },
-    // Cert is issued for the hostname, not the IP we're connecting to.
-    tls: { servername: host },
-    connectionTimeout: 10_000,
-    greetingTimeout: 10_000,
-    socketTimeout: 15_000,
+async function getAccessToken(): Promise<string> {
+  if (cachedToken && cachedToken.expiresAt > Date.now() + 30_000) {
+    return cachedToken.value;
+  }
+  if (!clientId || !clientSecret || !refreshToken) {
+    throw new Error('Gmail OAuth credentials are not configured');
+  }
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'refresh_token',
+      client_id: clientId,
+      client_secret: clientSecret,
+      refresh_token: refreshToken,
+    }).toString(),
   });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Token refresh failed (${res.status}): ${body}`);
+  }
+  const data = (await res.json()) as {
+    access_token: string;
+    expires_in: number;
+    scope?: string;
+  };
+  cachedToken = {
+    value: data.access_token,
+    expiresAt: Date.now() + data.expires_in * 1000,
+  };
+  return data.access_token;
 }
 
-async function getTransporter(): Promise<Transporter | null> {
-  if (cachedTransporter !== undefined) return cachedTransporter;
-  if (initPromise) return initPromise;
-  if (!user || !pass) {
-    cachedTransporter = null;
-    return null;
-  }
-  initPromise = (async () => {
-    let connectHost = host;
-    try {
-      const { address } = await dnsP.lookup(host, { family: 4 });
-      connectHost = address;
-      console.log(`[email] Resolved ${host} → ${address} (forcing IPv4)`);
-    } catch (err) {
-      console.warn(
-        `[email] IPv4 lookup failed for ${host}, falling back to hostname:`,
-        (err as Error).message,
-      );
-    }
-    cachedTransporter = buildTransporter(connectHost);
-    return cachedTransporter;
-  })();
-  return initPromise;
+function buildMime(opts: { to: string; subject: string; html: string }): string {
+  // Headers + blank line + body, CRLF separated, per RFC 2822.
+  const lines = [
+    `From: ${from}`,
+    `To: ${opts.to}`,
+    `Subject: ${encodeSubject(opts.subject)}`,
+    'MIME-Version: 1.0',
+    'Content-Type: text/html; charset=UTF-8',
+    'Content-Transfer-Encoding: 7bit',
+    '',
+    opts.html,
+  ];
+  return lines.join('\r\n');
+}
+
+function encodeSubject(subject: string): string {
+  // ASCII subjects don't need encoding; non-ASCII gets RFC 2047 encoded-word.
+  // eslint-disable-next-line no-control-regex
+  if (/^[\x00-\x7F]*$/.test(subject)) return subject;
+  return `=?UTF-8?B?${Buffer.from(subject, 'utf8').toString('base64')}?=`;
+}
+
+function base64url(s: string): string {
+  return Buffer.from(s, 'utf8').toString('base64url');
 }
 
 export type SendEmailOptions = {
@@ -67,18 +93,18 @@ export type SendEmailOptions = {
 
 export type EmailConfigStatus = {
   configured: boolean;
-  host: string;
-  port: number;
-  user: string | null;
+  authMode: 'gmail-oauth' | 'not-configured';
+  clientId: string | null;
+  refreshToken: 'set' | 'missing';
   from: string;
 };
 
 export function getEmailConfig(): EmailConfigStatus {
   return {
-    configured: Boolean(user && pass),
-    host,
-    port,
-    user: user ?? null,
+    configured,
+    authMode: configured ? 'gmail-oauth' : 'not-configured',
+    clientId: clientId ? clientId.slice(0, 12) + '…' : null,
+    refreshToken: refreshToken ? 'set' : 'missing',
     from,
   };
 }
@@ -87,10 +113,11 @@ export async function verifyEmailTransport(): Promise<
   | { ok: true }
   | { ok: false; reason: 'not-configured' | 'verify-failed'; error?: string }
 > {
-  const t = await getTransporter();
-  if (!t) return { ok: false, reason: 'not-configured' };
+  if (!configured) return { ok: false, reason: 'not-configured' };
   try {
-    await t.verify();
+    // Refreshing the access token proves the refresh token + client
+    // credentials are still valid. No actual send happens.
+    await getAccessToken();
     return { ok: true };
   } catch (err) {
     return {
@@ -102,23 +129,36 @@ export async function verifyEmailTransport(): Promise<
 }
 
 export async function sendEmail(opts: SendEmailOptions): Promise<void> {
-  const t = await getTransporter();
-  if (!t) {
+  if (!configured) {
     console.warn(
-      `[email] SMTP credentials missing. Would have sent to ${opts.to}: "${opts.subject}"`,
+      `[email] Gmail OAuth not configured. Would have sent to ${opts.to}: "${opts.subject}"`,
     );
     return;
   }
+  let accessToken: string;
   try {
-    await t.sendMail({
-      from,
-      to: opts.to,
-      subject: opts.subject,
-      html: opts.html,
-    });
+    accessToken = await getAccessToken();
   } catch (err) {
-    console.error('[email] SMTP send failed:', err);
-    throw new Error(`Failed to send email: ${(err as Error).message}`);
+    console.error('[email] Could not refresh access token:', err);
+    throw new Error(`Token refresh failed: ${(err as Error).message}`);
+  }
+
+  const mime = buildMime(opts);
+  const res = await fetch(
+    'https://gmail.googleapis.com/gmail/v1/users/me/messages/send',
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ raw: base64url(mime) }),
+    },
+  );
+  if (!res.ok) {
+    const body = await res.text();
+    console.error(`[email] Gmail send failed (${res.status}):`, body);
+    throw new Error(`Gmail send failed (${res.status}): ${body}`);
   }
 }
 

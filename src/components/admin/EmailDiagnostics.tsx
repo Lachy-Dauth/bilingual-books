@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 
 type ConfigStatus = {
   configured: boolean;
-  host: string;
-  port: number;
-  user: string | null;
+  authMode: string;
+  clientId: string | null;
+  refreshToken: string;
   from: string;
 };
 
@@ -74,32 +74,36 @@ export function EmailDiagnostics({ defaultTo }: { defaultTo: string }) {
 
   return (
     <div className="border border-[color:var(--border)] rounded-lg p-4 bg-[color:var(--surface)]">
-      <h2 className="font-bold mb-3">SMTP diagnostics</h2>
+      <h2 className="font-bold mb-3">Email diagnostics</h2>
 
       {loadingStatus ? (
         <p className="text-[color:var(--muted)] text-sm">Checking…</p>
       ) : config ? (
-        <dl className="text-sm grid grid-cols-[110px_1fr] gap-y-1 mb-4">
+        <dl className="text-sm grid grid-cols-[140px_1fr] gap-y-1 mb-4">
           <dt className="text-[color:var(--muted)]">Configured</dt>
           <dd>
             {config.configured ? (
               <span className="text-green-700 font-semibold">Yes</span>
             ) : (
-              <span className="text-red-700 font-semibold">No — SMTP_USER/SMTP_PASS missing</span>
+              <span className="text-red-700 font-semibold">
+                No — Gmail OAuth env vars missing
+              </span>
             )}
           </dd>
-          <dt className="text-[color:var(--muted)]">Host</dt>
-          <dd>
-            {config.host}:{config.port}
-          </dd>
-          <dt className="text-[color:var(--muted)]">User</dt>
-          <dd>{config.user ?? '—'}</dd>
+          <dt className="text-[color:var(--muted)]">Mode</dt>
+          <dd>{config.authMode}</dd>
           <dt className="text-[color:var(--muted)]">From</dt>
           <dd className="break-all">{config.from}</dd>
+          <dt className="text-[color:var(--muted)]">Client ID</dt>
+          <dd className="break-all">{config.clientId ?? '—'}</dd>
+          <dt className="text-[color:var(--muted)]">Refresh token</dt>
+          <dd>{config.refreshToken === 'set' ? 'set' : 'missing'}</dd>
           <dt className="text-[color:var(--muted)]">Auth check</dt>
           <dd>
             {verify?.ok ? (
-              <span className="text-green-700 font-semibold">Connected & authenticated</span>
+              <span className="text-green-700 font-semibold">
+                Refresh token exchanged successfully
+              </span>
             ) : (
               <span className="text-red-700 font-semibold">
                 Failed
@@ -152,7 +156,8 @@ export function EmailDiagnostics({ defaultTo }: { defaultTo: string }) {
       )}
 
       <p className="text-xs text-[color:var(--muted)] mt-3">
-        Test sends a real email. Failures here are the same ones that would block /forgot-password.
+        Test sends a real email via Gmail API. Failures here are the same
+        ones that would block /forgot-password.
       </p>
     </div>
   );

@@ -1,20 +1,20 @@
 #!/usr/bin/env tsx
 /**
- * Local SMTP test runner.
+ * Local Gmail-API test runner.
  *
  * Usage:
- *   1. Put SMTP_USER, SMTP_PASS (and optionally SMTP_HOST, SMTP_PORT,
- *      SMTP_FROM) in a `.env.local` file at the repo root.
+ *   1. In .env.local set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and
+ *      GMAIL_REFRESH_TOKEN (same values you'd set in Railway).
  *   2. Run:  npm run email:test -- recipient@example.com
  *
- * The script loads the env, prints the resolved config, runs the same
- * verify() check the /admin/email-test panel uses, then sends a real
- * test message. Errors are printed verbatim — exactly what you'd see
- * in production logs.
+ * The script loads env, prints the resolved config, runs the same
+ * verify() the /admin/email-test panel uses (refreshes an access token
+ * against Google's OAuth endpoint), then sends a real test message via
+ * the Gmail API.
  */
 import { config as loadEnv } from 'dotenv';
 loadEnv({ path: '.env.local', quiet: true });
-loadEnv({ quiet: true }); // also try .env
+loadEnv({ quiet: true });
 
 import {
   getEmailConfig,
@@ -28,55 +28,56 @@ async function main() {
     console.error('Usage: npm run email:test -- recipient@example.com');
     console.error('');
     console.error('Required env vars (set in .env.local):');
-    console.error('  SMTP_USER   full Gmail address');
-    console.error('  SMTP_PASS   16-char Gmail App Password (no spaces)');
+    console.error('  GOOGLE_CLIENT_ID       OAuth client ID');
+    console.error('  GOOGLE_CLIENT_SECRET   OAuth client secret');
+    console.error('  GMAIL_REFRESH_TOKEN    From `npm run gmail:get-token`');
     console.error('Optional:');
-    console.error('  SMTP_HOST   default smtp.gmail.com');
-    console.error('  SMTP_PORT   default 465');
-    console.error('  SMTP_FROM   default "Bilingual Books <$SMTP_USER>"');
+    console.error('  GMAIL_SEND_FROM        Default bilingualbooksgen@gmail.com');
     process.exit(1);
   }
 
   const config = getEmailConfig();
-  console.log('\nResolved SMTP config:');
-  console.log('  host       ', `${config.host}:${config.port}`);
-  console.log('  user       ', config.user ?? '(unset)');
-  console.log('  from       ', config.from);
-  console.log('  configured ', config.configured ? 'yes' : 'NO — SMTP_USER/SMTP_PASS missing');
+  console.log('\nResolved email config:');
+  console.log('  mode          ', config.authMode);
+  console.log('  from          ', config.from);
+  console.log('  client ID     ', config.clientId ?? '(unset)');
+  console.log('  refresh token ', config.refreshToken);
+  console.log('  configured    ', config.configured ? 'yes' : 'NO');
 
   if (!config.configured) {
-    console.error('\nSet SMTP_USER and SMTP_PASS in .env.local and try again.');
+    console.error(
+      '\nSet GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GMAIL_REFRESH_TOKEN in .env.local.',
+    );
+    console.error('Generate the refresh token with: npm run gmail:get-token');
     process.exit(1);
   }
 
-  console.log('\nStep 1: verify() — opening connection and authenticating…');
+  console.log('\nStep 1: verify() — refreshing access token via Google OAuth…');
   const verify = await verifyEmailTransport();
   if (!verify.ok) {
     console.error('  FAILED:', verify.error ?? verify.reason);
-    if (verify.error?.includes('ENETUNREACH')) {
-      console.error('\n  Hint: your network may be returning IPv6 records for the SMTP host');
-      console.error('  but the route to IPv6 is down. Try setting NODE_OPTIONS:');
-      console.error('    NODE_OPTIONS="--dns-result-order=ipv4first" npm run email:test -- ' + to);
+    if (verify.error?.includes('invalid_grant')) {
+      console.error('\n  Hint: the refresh token is invalid, revoked, or for a different');
+      console.error('  client. Re-run `npm run gmail:get-token` to mint a fresh one.');
     }
-    if (verify.error?.includes('Invalid login')) {
-      console.error('\n  Hint: SMTP_PASS is wrong. For Gmail, generate a 16-char App Password at');
-      console.error('  https://myaccount.google.com/apppasswords (2-Step Verification must be on)');
-      console.error('  and paste it without the spaces Google shows.');
+    if (verify.error?.includes('invalid_client')) {
+      console.error('\n  Hint: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET doesn\'t match the');
+      console.error('  client that issued the refresh token.');
     }
     process.exit(1);
   }
-  console.log('  OK — server accepted credentials.');
+  console.log('  OK — Google issued an access token.');
 
   console.log(`\nStep 2: sendMail() — delivering test message to ${to}…`);
   try {
     await sendEmail({
       to,
-      subject: 'Bilingual Books — local SMTP test',
+      subject: 'Bilingual Books — local Gmail API test',
       html: `<p>This is a local test from <code>npm run email:test</code>.</p>
-<p>If you're reading it, your SMTP credentials work end-to-end.</p>
+<p>If you're reading it, your Gmail OAuth credentials work end-to-end.</p>
 <p style="color:#888;font-size:0.85em;">Sent ${new Date().toISOString()}</p>`,
     });
-    console.log('  OK — message accepted by the SMTP server.');
+    console.log('  OK — Gmail API accepted the message.');
     console.log(`\nDone. Check ${to} (and the spam folder).`);
   } catch (err) {
     console.error('  FAILED:', (err as Error).message);
