@@ -321,6 +321,25 @@ body.bw .converter-shell input[type='text']:focus {
   margin: 0 auto;
 }
 
+.converter-shell .download-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  margin: -28px -20px 18px;
+  padding: 12px 20px;
+  box-shadow: var(--shadow);
+}
+.converter-shell .download-bar-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
 .converter-shell .epub-progress {
   position: sticky;
   top: 0;

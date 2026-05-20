@@ -9,6 +9,7 @@ import { countWords } from '@/lib/converter/util';
 import type { SentencePair } from '@/lib/converter/types';
 import { logConversion, precheck } from '@/lib/client/api';
 import { BuyMeACoffee } from '@/components/BuyMeACoffee';
+import { DownloadBar } from './DownloadBar';
 
 export function PasteTab() {
   const [sl, setSl] = useState('');
@@ -90,6 +91,18 @@ export function PasteTab() {
 
   return (
     <>
+      {done && (
+        <DownloadBar>
+          <button type="button" className="cs-btn" onClick={onDownload}>
+            Download EPUB
+          </button>
+          <button type="button" className="cs-btn btn-secondary" onClick={onReset}>
+            Start over
+          </button>
+          <BuyMeACoffee label="Liked it? Buy me a coffee" />
+        </DownloadBar>
+      )}
+
       {limitMsg && (
         <p className="field-hint" style={{ color: 'var(--accent)' }}>
           {limitMsg}
@@ -153,17 +166,6 @@ export function PasteTab() {
         >
           {busy ? 'Translating…' : 'Generate Book'}
         </button>
-        {done && (
-          <>
-            <button type="button" className="cs-btn" onClick={onDownload}>
-              Download EPUB
-            </button>
-            <button type="button" className="cs-btn btn-secondary" onClick={onReset}>
-              Start over
-            </button>
-            <BuyMeACoffee label="Liked it? Buy me a coffee" />
-          </>
-        )}
       </div>
 
       {pairs.length > 0 && (

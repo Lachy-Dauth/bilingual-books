@@ -9,6 +9,7 @@ import { countWords, slugify } from '@/lib/converter/util';
 import type { ParsedEpub, TranslationItem } from '@/lib/converter/types';
 import { logConversion, precheck } from '@/lib/client/api';
 import { BuyMeACoffee } from '@/components/BuyMeACoffee';
+import { DownloadBar } from './DownloadBar';
 
 type Phase = 'idle' | 'parsed' | 'translating' | 'done' | 'cancelled';
 
@@ -144,8 +145,19 @@ export function EpubTab({
 
   const totalBlocks = parsed?.chapters.reduce((s, c) => s + c.blocks.length, 0) ?? 0;
 
+  const downloadReady = (phase === 'done' || phase === 'cancelled') && downloadRef.current;
+
   return (
     <>
+      {downloadReady && (
+        <DownloadBar>
+          <button type="button" className="cs-btn" onClick={onDownload}>
+            Download EPUB
+          </button>
+          <BuyMeACoffee label="Liked it? Buy me a coffee" />
+        </DownloadBar>
+      )}
+
       {limitMsg && (
         <p className="field-hint" style={{ color: 'var(--accent)' }}>
           {limitMsg}
@@ -234,14 +246,6 @@ export function EpubTab({
           <button type="button" className="cs-btn btn-secondary" onClick={onCancel}>
             Cancel
           </button>
-        )}
-        {(phase === 'done' || phase === 'cancelled') && downloadRef.current && (
-          <>
-            <button type="button" className="cs-btn" onClick={onDownload}>
-              Download EPUB
-            </button>
-            <BuyMeACoffee label="Liked it? Buy me a coffee" />
-          </>
         )}
       </div>
 
