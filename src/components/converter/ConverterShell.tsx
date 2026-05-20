@@ -4,10 +4,11 @@ import { useState } from 'react';
 import { PasteTab } from './PasteTab';
 import { EpubTab } from './EpubTab';
 import { GutenbergTab } from './GutenbergTab';
+import { PopularTab } from './PopularTab';
 import { ThemeToggle } from './ThemeToggle';
 import { InfoModal } from './InfoModal';
 
-type Tab = 'text' | 'epub' | 'gutenberg';
+type Tab = 'text' | 'epub' | 'popular' | 'gutenberg';
 
 export function ConverterShell() {
   const [tab, setTab] = useState<Tab>('epub');
@@ -30,7 +31,7 @@ export function ConverterShell() {
         </header>
 
         <div className="tabs" role="tablist">
-          {(['text', 'epub', 'gutenberg'] as const).map((key) => (
+          {(['text', 'epub', 'popular', 'gutenberg'] as const).map((key) => (
           <button
             key={key}
             type="button"
@@ -42,7 +43,9 @@ export function ConverterShell() {
               ? 'Paste text'
               : key === 'epub'
                 ? 'Upload EPUB'
-                : 'Search Gutenberg'}
+                : key === 'popular'
+                  ? 'Popular books'
+                  : 'Search Gutenberg'}
           </button>
         ))}
         </div>
@@ -52,6 +55,9 @@ export function ConverterShell() {
         </div>
         <div hidden={tab !== 'epub'}>
           <EpubTab />
+        </div>
+        <div hidden={tab !== 'popular'}>
+          <PopularTab />
         </div>
         <div hidden={tab !== 'gutenberg'}>
           <GutenbergTab />

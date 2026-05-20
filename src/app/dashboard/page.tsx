@@ -3,6 +3,7 @@ import { getUserStats, getRecentConversions } from '@/lib/stats';
 import { migrateAnonymousConversions } from '@/lib/migrate-anon';
 import { StatsCards } from '@/components/dashboard/StatsCards';
 import { ConversionTable } from '@/components/dashboard/ConversionTable';
+import { DeleteAccountButton } from '@/components/dashboard/DeleteAccountButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,6 +49,11 @@ export default async function DashboardPage() {
       <section className="mt-8">
         <h2 className="text-lg font-bold mb-3">Recent conversions</h2>
         <ConversionTable rows={recent.items} />
+      </section>
+
+      <section className="mt-12 pt-6 border-t border-[color:var(--border)]">
+        <h2 className="text-lg font-bold mb-2">Danger zone</h2>
+        <DeleteAccountButton />
       </section>
     </main>
   );

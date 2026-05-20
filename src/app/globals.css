@@ -136,6 +136,45 @@ a:hover {
   color: var(--accent);
 }
 
+/* Collapsible advanced section */
+.converter-shell .advanced {
+  margin: 6px 0 14px;
+}
+.converter-shell .advanced > summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 6px 0;
+  user-select: none;
+}
+.converter-shell .advanced > summary::-webkit-details-marker {
+  display: none;
+}
+.converter-shell .advanced > summary::after {
+  content: '\25be'; /* ▾ */
+  font-size: 0.9rem;
+  margin-left: 2px;
+  transition: transform 0.15s;
+}
+.converter-shell .advanced[open] > summary::after {
+  transform: rotate(180deg);
+}
+.converter-shell .advanced > summary:hover {
+  color: var(--accent);
+}
+.converter-shell .advanced-content {
+  padding: 10px 0 0;
+  border-top: 1px dashed var(--border);
+  margin-top: 4px;
+}
+
 /* Help icon next to a field label, with hover/focus tooltip */
 .converter-shell .help-tip {
   position: relative;

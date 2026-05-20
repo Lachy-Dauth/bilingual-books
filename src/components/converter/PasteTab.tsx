@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { isRtl } from '@/lib/converter/constants';
 import { splitSentences } from '@/lib/converter/paste';
-import { translateText } from '@/lib/converter/translate';
+import { translateText, type CancelSignal } from '@/lib/converter/translate';
 import { buildSimpleEpub, saveBlobAs } from '@/lib/converter/epub-build';
 import { countWords } from '@/lib/converter/util';
 import type { SentencePair } from '@/lib/converter/types';
@@ -21,7 +21,9 @@ export function PasteTab() {
   const [pairs, setPairs] = useState<SentencePair[]>([]);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [cancelled, setCancelled] = useState(false);
   const [limitMsg, setLimitMsg] = useState<string | null>(null);
+  const cancelRef = useRef<CancelSignal>({ cancelled: false });
 
   async function onGenerate() {
     const sentences = splitSentences(sourceText);
@@ -46,20 +48,32 @@ export function PasteTab() {
       );
     }
 
+    cancelRef.current = { cancelled: false };
+    setCancelled(false);
     setBusy(true);
     setDone(false);
     const start = Date.now();
     const initial = sentences.map((src) => ({ src, tgt: '' }));
     setPairs(initial);
 
+    let translated = 0;
     for (let i = 0; i < initial.length; i++) {
-      const translation = await translateText(initial[i].src, sourceLang, targetLang);
+      if (cancelRef.current.cancelled) break;
+      const translation = await translateText(
+        initial[i].src,
+        sourceLang,
+        targetLang,
+        cancelRef.current,
+      );
       initial[i].tgt = translation;
+      translated++;
       setPairs([...initial]);
     }
     const elapsed = Date.now() - start;
+    const wasCancelled = cancelRef.current.cancelled;
     setBusy(false);
     setDone(true);
+    setCancelled(wasCancelled);
 
     void logConversion({
       bookTitle: bookTitle.trim() || `Bilingual (${sourceLang} to ${targetLang})`,
@@ -68,7 +82,12 @@ export function PasteTab() {
       wordCount: plannedWords,
       source: 'paste',
       durationMs: elapsed,
+      status: wasCancelled ? 'partial' : 'ok',
     });
+  }
+
+  function onCancel() {
+    cancelRef.current.cancelled = true;
   }
 
   async function onDownload() {
@@ -85,10 +104,12 @@ export function PasteTab() {
   }
 
   function onReset() {
+    cancelRef.current.cancelled = true;
     setPairs([]);
     setDone(false);
     setSourceText('');
     setLimitMsg(null);
+    setCancelled(false);
   }
 
   return (
@@ -159,7 +180,18 @@ export function PasteTab() {
         >
           {busy ? 'Translating…' : 'Generate Book'}
         </button>
+        {busy && (
+          <button type="button" className="cs-btn btn-secondary" onClick={onCancel}>
+            Cancel
+          </button>
+        )}
       </div>
+
+      {cancelled && done && (
+        <p className="field-hint" style={{ color: 'var(--accent)' }}>
+          Cancelled. Showing partial translation.
+        </p>
+      )}
 
       {pairs.length > 0 && (
         <div style={{ marginTop: 28 }}>

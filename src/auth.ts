@@ -13,6 +13,23 @@ export const auth = betterAuth({
     enabled: true,
     autoSignIn: true,
     requireEmailVerification: false,
+    sendResetPassword: async ({ user, url }) => {
+      // No mail provider is wired up. The reset link is logged so that during
+      // local development / an admin running `railway logs` can grab it. To
+      // turn this into a real password-reset flow, plug in Resend / Postmark /
+      // SES here:
+      //
+      //   await resend.emails.send({
+      //     from: 'noreply@bilingualbooks.app',
+      //     to: user.email,
+      //     subject: 'Reset your password',
+      //     html: `<p>Reset your password: <a href="${url}">${url}</a></p>`,
+      //   });
+      console.log(
+        `[auth] Password reset requested for ${user.email}. ` +
+          `Reset URL (valid ~1h): ${url}`,
+      );
+    },
   },
   socialProviders:
     googleClientId && googleClientSecret

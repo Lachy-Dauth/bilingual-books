@@ -26,6 +26,17 @@ export async function searchBooks(query: string, page = 1): Promise<GutendexResp
   return res.json();
 }
 
+/** Top books for a language, ordered by Gutenberg download_count (popular first). */
+export async function popularBooks(language: string): Promise<GutendexResponse> {
+  const url = new URL(GUTENDEX_BASE);
+  url.searchParams.set('languages', language.toLowerCase().trim());
+  // Gutendex's default sort is by download_count descending, which is exactly
+  // what "most popular" means.
+  const res = await fetch(url.toString());
+  if (!res.ok) throw new Error(`Gutendex popular failed: ${res.status}`);
+  return res.json();
+}
+
 export function pickFormat(
   formats: Record<string, string>,
   preferred: 'epub' | 'txt',

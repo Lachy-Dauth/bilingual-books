@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { isRtl, normalizeLanguageCode, SPEED_LEVELS } from '@/lib/converter/constants';
 import { parseEpub } from '@/lib/converter/epub-parse';
 import { translateAll, type CancelSignal } from '@/lib/converter/translate';
@@ -30,9 +31,9 @@ export function EpubTab({
 }) {
   const [rawParsed, setRawParsed] = useState<ParsedEpub | null>(null);
   const [parsed, setParsed] = useState<ParsedEpub | null>(null);
-  const [mode, setMode] = useState<SplitMode>('paragraph');
-  const [collapseBreaks, setCollapseBreaks] = useState(false);
-  const [speed, setSpeed] = useState<SpeedMode>('normal');
+  const [mode, setMode] = useLocalStorage<SplitMode>('bb_split_mode', 'paragraph');
+  const [collapseBreaks, setCollapseBreaks] = useLocalStorage('bb_collapse_breaks', true);
+  const [speed, setSpeed] = useLocalStorage<SpeedMode>('bb_speed', 'normal');
   const [sl, setSl] = useState('');
   const [tl, setTl] = useState('');
   const [titleOverride, setTitleOverride] = useState('');
@@ -245,6 +246,10 @@ export function EpubTab({
         </div>
       )}
 
+      <details className="advanced">
+        <summary>Advanced options</summary>
+        <div className="advanced-content">
+
       <label className="field-label">
         Split translation by
         <HelpTip>
@@ -386,6 +391,9 @@ export function EpubTab({
           Collapse
         </button>
       </div>
+
+        </div>
+      </details>
 
       <div className="lang-row">
         <div>
