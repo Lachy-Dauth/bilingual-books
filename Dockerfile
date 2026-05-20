@@ -1,9 +1,11 @@
+# syntax=docker/dockerfile:1.6
 FROM node:22-alpine AS deps
 WORKDIR /app
 RUN apk add --no-cache openssl libc6-compat
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma
-RUN npm ci --no-audit --no-fund
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --no-audit --no-fund --prefer-offline
 
 FROM node:22-alpine AS builder
 WORKDIR /app
@@ -35,6 +37,10 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/src ./src
 COPY --from=builder /app/tsconfig.json ./tsconfig.json
 COPY docker-entrypoint.sh ./docker-entrypoint.sh
+# Drop devDependencies (eslint, typescript, tailwind, etc.) from the runner.
+# `prisma` and `tsx` were promoted to dependencies in package.json so the
+# entrypoint's migrate + seed steps survive this prune.
+RUN npm prune --omit=dev
 RUN chmod +x ./docker-entrypoint.sh && chown -R nextjs:nodejs /app
 
 USER nextjs

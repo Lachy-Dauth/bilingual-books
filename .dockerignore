@@ -6,6 +6,13 @@ node_modules
 .env.*.local
 legacy
 *.md
+*.log
+*.tsbuildinfo
+coverage
+out
+dist
+.vscode
+.idea
 .DS_Store
 Dockerfile
 .dockerignore
