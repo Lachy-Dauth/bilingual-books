@@ -31,25 +31,31 @@ export function ConverterShell() {
 
         <div className="tabs" role="tablist">
           {(['text', 'epub', 'gutenberg'] as const).map((key) => (
-            <button
-              key={key}
-              type="button"
-              role="tab"
-              className={`tab-btn ${tab === key ? 'active' : ''}`}
-              onClick={() => setTab(key)}
-            >
-              {key === 'text'
-                ? 'Paste text'
-                : key === 'epub'
-                  ? 'Upload EPUB'
-                  : 'Search Gutenberg'}
-            </button>
-          ))}
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            className={`tab-btn ${tab === key ? 'active' : ''}`}
+            onClick={() => setTab(key)}
+          >
+            {key === 'text'
+              ? 'Paste text'
+              : key === 'epub'
+                ? 'Upload EPUB'
+                : 'Search Gutenberg'}
+          </button>
+        ))}
         </div>
 
-        {tab === 'text' && <PasteTab />}
-        {tab === 'epub' && <EpubTab />}
-        {tab === 'gutenberg' && <GutenbergTab />}
+        <div hidden={tab !== 'text'}>
+          <PasteTab />
+        </div>
+        <div hidden={tab !== 'epub'}>
+          <EpubTab />
+        </div>
+        <div hidden={tab !== 'gutenberg'}>
+          <GutenbergTab />
+        </div>
 
         <div className="actions" style={{ marginTop: 20 }}>
           <ThemeToggle />
