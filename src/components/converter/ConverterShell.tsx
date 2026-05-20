@@ -10,7 +10,7 @@ import { InfoModal } from './InfoModal';
 type Tab = 'text' | 'epub' | 'gutenberg';
 
 export function ConverterShell() {
-  const [tab, setTab] = useState<Tab>('text');
+  const [tab, setTab] = useState<Tab>('epub');
   const [infoOpen, setInfoOpen] = useState(false);
 
   return (
