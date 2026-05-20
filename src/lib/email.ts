@@ -15,6 +15,10 @@ const transporter: Transporter | null =
         port,
         secure: port === 465,
         auth: { user, pass },
+        // Don't let a misconfigured SMTP host hang the request indefinitely.
+        connectionTimeout: 10_000,
+        greetingTimeout: 10_000,
+        socketTimeout: 15_000,
       })
     : null;
 

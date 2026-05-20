@@ -15,13 +15,19 @@ export const auth = betterAuth({
     autoSignIn: true,
     requireEmailVerification: false,
     sendResetPassword: async ({ user, url }) => {
-      // Sends via Resend when RESEND_API_KEY is configured; otherwise the
-      // helper falls back to a console.warn so local dev / first-time setups
-      // still surface the reset link.
-      await sendEmail({
+      // Fire-and-forget: SMTP can take several seconds (or hang on bad
+      // creds), and we don't want the /forgot-password response to wait
+      // on it. The user sees the success message immediately; failures
+      // are logged on the server side.
+      void sendEmail({
         to: user.email,
         subject: 'Reset your Bilingual Books password',
         html: passwordResetHtml(url),
+      }).catch((err) => {
+        console.error(
+          `[auth] Failed to deliver reset email to ${user.email}:`,
+          err,
+        );
       });
     },
   },
