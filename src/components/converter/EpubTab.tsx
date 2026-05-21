@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { isRtl, normalizeLanguageCode, SPEED_LEVELS } from '@/lib/converter/constants';
 import { parseEpub } from '@/lib/converter/epub-parse';
@@ -17,6 +17,7 @@ import type {
 } from '@/lib/converter/types';
 import { logConversion, precheck } from '@/lib/client/api';
 import { BuyMeACoffee } from '@/components/BuyMeACoffee';
+import { useT } from '@/i18n/I18nProvider';
 import { DownloadBar } from './DownloadBar';
 import { LanguageInput } from './LanguageInput';
 import { HelpTip } from './HelpTip';
@@ -24,11 +25,18 @@ import { SaveAsPdfButton } from './SaveAsPdfButton';
 
 type Phase = 'idle' | 'parsed' | 'translating' | 'done' | 'cancelled';
 
+type StatusKind =
+  | { type: 'default' }
+  | { type: 'reading' }
+  | { type: 'loaded'; chapters: number; blocks: number }
+  | { type: 'error'; message: string };
+
 export function EpubTab({
   gutenbergSeed,
 }: {
   gutenbergSeed?: { bytes: ArrayBuffer; suggestedTitle: string; gutenbergId: number };
 }) {
+  const { t } = useT();
   const [rawParsed, setRawParsed] = useState<ParsedEpub | null>(null);
   const [parsed, setParsed] = useState<ParsedEpub | null>(null);
   const [mode, setMode] = useLocalStorage<SplitMode>('bb_split_mode', 'paragraph');
@@ -37,10 +45,7 @@ export function EpubTab({
   const [sl, setSl] = useState('');
   const [tl, setTl] = useState('');
   const [titleOverride, setTitleOverride] = useState('');
-  const [status, setStatus] = useState(
-    'Choose an EPUB file. Chapters and paragraphs will be detected automatically.',
-  );
-  const [errorStatus, setErrorStatus] = useState(false);
+  const [status, setStatus] = useState<StatusKind>({ type: 'default' });
   const [phase, setPhase] = useState<Phase>('idle');
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [limitMsg, setLimitMsg] = useState<string | null>(null);
@@ -50,15 +55,30 @@ export function EpubTab({
     null,
   );
 
+  const statusText = useMemo(() => {
+    switch (status.type) {
+      case 'default':
+        return t('epub.fileHint');
+      case 'reading':
+        return t('epub.reading');
+      case 'loaded':
+        return t('epub.loaded', {
+          chapters: status.chapters,
+          blocks: status.blocks,
+        });
+      case 'error':
+        return t('epub.couldNotRead', { error: status.message });
+    }
+  }, [status, t]);
+
   async function handleFile(buf: ArrayBuffer, fallbackTitle: string) {
-    setStatus('Reading EPUB…');
-    setErrorStatus(false);
+    setStatus({ type: 'reading' });
     try {
       const p = await parseEpub(buf);
       const totalBlocks = p.chapters.reduce((s, c) => s + c.blocks.length, 0);
       setRawParsed(p);
       setParsed(expandParsed(p, mode, collapseBreaks));
-      setStatus(`Loaded: ${p.chapters.length} chapters, ${totalBlocks} blocks.`);
+      setStatus({ type: 'loaded', chapters: p.chapters.length, blocks: totalBlocks });
       setPhase('parsed');
       setHasOutput(false);
       setDownload(null);
@@ -67,8 +87,7 @@ export function EpubTab({
     } catch (err) {
       setRawParsed(null);
       setParsed(null);
-      setStatus(`Could not read EPUB: ${(err as Error).message}`);
-      setErrorStatus(true);
+      setStatus({ type: 'error', message: (err as Error).message });
       setPhase('idle');
     }
   }
@@ -120,14 +139,22 @@ export function EpubTab({
     if (!pre.allowed) {
       setLimitMsg(
         pre.reason === 'monthly-word-limit-exceeded'
-          ? `Monthly limit reached: ${pre.used}/${pre.limit} words on plan ${pre.plan}.`
-          : `Conversion blocked: ${pre.reason ?? 'unknown'}`,
+          ? t('limit.exceeded', {
+              used: pre.used,
+              limit: pre.limit ?? 0,
+              plan: pre.plan,
+            })
+          : t('limit.blocked', { reason: pre.reason ?? 'unknown' }),
       );
       return;
     }
     if (pre.limit && pre.remaining !== null) {
       setLimitMsg(
-        `${pre.used.toLocaleString()} of ${pre.limit.toLocaleString()} words used this month (${pre.plan} plan).`,
+        t('limit.usage', {
+          used: pre.used.toLocaleString(),
+          limit: pre.limit.toLocaleString(),
+          plan: pre.plan,
+        }),
       );
     }
 
@@ -189,16 +216,17 @@ export function EpubTab({
   const totalBlocks = parsed?.chapters.reduce((s, c) => s + c.blocks.length, 0) ?? 0;
   const downloadReady =
     (phase === 'done' || phase === 'cancelled') && download !== null;
+  const isError = status.type === 'error';
 
   return (
     <>
       {downloadReady && (
         <DownloadBar>
           <button type="button" className="cs-btn" onClick={onDownload}>
-            Download EPUB
+            {t('common.download')}
           </button>
           <SaveAsPdfButton />
-          <BuyMeACoffee label="Liked it? Buy me a coffee" />
+          <BuyMeACoffee labelKey="common.thanksBmc" />
         </DownloadBar>
       )}
 
@@ -211,7 +239,7 @@ export function EpubTab({
       {!gutenbergSeed && (
         <>
           <label className="field-label" htmlFor="epub-file">
-            EPUB file
+            {t('epub.file')}
           </label>
           <input
             id="epub-file"
@@ -222,19 +250,19 @@ export function EpubTab({
         </>
       )}
 
-      <p className={`epub-status ${errorStatus ? 'error' : ''}`}>{status}</p>
+      <p className={`epub-status ${isError ? 'error' : ''}`}>{statusText}</p>
 
       {parsed && (
         <div className="epub-info">
           {[
-            ['Title', parsed.title || '—'],
-            ['Author', parsed.author || '—'],
-            ['Detected language', parsed.language || '—'],
-            ['Chapters', String(parsed.chapters.length)],
+            [t('epub.info.title'), parsed.title || '—'],
+            [t('epub.info.author'), parsed.author || '—'],
+            [t('epub.info.language'), parsed.language || '—'],
+            [t('epub.info.chapters'), String(parsed.chapters.length)],
             [
               mode === 'sentence'
-                ? 'Sentences / headings'
-                : 'Paragraphs / headings',
+                ? t('epub.info.sentences')
+                : t('epub.info.paragraphs'),
               String(totalBlocks),
             ],
           ].map(([k, v]) => (
@@ -247,178 +275,185 @@ export function EpubTab({
       )}
 
       <details className="advanced">
-        <summary>Advanced options</summary>
+        <summary>{t('epub.advanced')}</summary>
         <div className="advanced-content">
+          <label className="field-label">
+            {t('split.label')}
+            <HelpTip>
+              <p>
+                <strong>{t('split.paragraph')}</strong> &mdash; translate each
+                paragraph as one block and display the same way. Fastest, fewest
+                API calls.
+              </p>
+              <p>
+                <strong>{t('split.sentence')}</strong> &mdash; split every
+                paragraph into sentences first, then translate each sentence on
+                its own. The translator has less context, so pronouns and
+                references can drift, but every row is exactly one source
+                sentence next to its translation.
+              </p>
+              <p>
+                <strong>{t('split.sentenceAligned')}</strong> &mdash; translate
+                each paragraph as a single chunk (full context), then split
+                both the source and the translation back into sentences and
+                pair them up proportionally. Best of both: paragraph-level
+                translation quality with sentence-level visual alignment.
+              </p>
+            </HelpTip>
+          </label>
+          <div className="segmented" role="tablist" aria-label={t('split.label')}>
+            <button
+              type="button"
+              className={mode === 'paragraph' ? 'active' : ''}
+              onClick={() => setMode('paragraph')}
+              disabled={phase === 'translating'}
+            >
+              {t('split.paragraph')}
+            </button>
+            <button
+              type="button"
+              className={mode === 'sentence' ? 'active' : ''}
+              onClick={() => setMode('sentence')}
+              disabled={phase === 'translating'}
+            >
+              {t('split.sentence')}
+            </button>
+            <button
+              type="button"
+              className={mode === 'sentence-aligned' ? 'active' : ''}
+              onClick={() => setMode('sentence-aligned')}
+              disabled={phase === 'translating'}
+            >
+              {t('split.sentenceAligned')}
+            </button>
+          </div>
 
-      <label className="field-label">
-        Split translation by
-        <HelpTip>
-          <p>
-            <strong>Paragraph</strong> &mdash; translate each paragraph as one
-            block and display the same way. Fastest, fewest API calls.
-          </p>
-          <p>
-            <strong>Sentence</strong> &mdash; split every paragraph into
-            sentences first, then translate each sentence on its own. The
-            translator has less context, so pronouns and references can drift,
-            but every row is exactly one source sentence next to its
-            translation.
-          </p>
-          <p>
-            <strong>Sentence (aligned)</strong> &mdash; translate each
-            paragraph as a single chunk (full context), then split both the
-            source and the translation back into sentences and pair them up
-            proportionally. Best of both: paragraph-level translation quality
-            with sentence-level visual alignment.
-          </p>
-        </HelpTip>
-      </label>
-      <div className="segmented" role="tablist" aria-label="Split mode">
-        <button
-          type="button"
-          className={mode === 'paragraph' ? 'active' : ''}
-          onClick={() => setMode('paragraph')}
-          disabled={phase === 'translating'}
-          title="Translate paragraph by paragraph and display the same way."
-        >
-          Paragraph
-        </button>
-        <button
-          type="button"
-          className={mode === 'sentence' ? 'active' : ''}
-          onClick={() => setMode('sentence')}
-          disabled={phase === 'translating'}
-          title="Split into sentences first, then translate each sentence on its own (less context for the translator)."
-        >
-          Sentence
-        </button>
-        <button
-          type="button"
-          className={mode === 'sentence-aligned' ? 'active' : ''}
-          onClick={() => setMode('sentence-aligned')}
-          disabled={phase === 'translating'}
-          title="Translate paragraph by paragraph (full context), then split the result into aligned sentence pairs."
-        >
-          Sentence (aligned)
-        </button>
-      </div>
+          <label className="field-label">
+            {t('speed.label')}
+            <HelpTip>
+              <p>
+                <strong>{t('speed.slow')}</strong> &mdash; 2 simultaneous
+                translations. Easiest on Google&rsquo;s free endpoint and never
+                trips its rate limit, but takes the longest for big books.
+              </p>
+              <p>
+                <strong>{t('speed.normal')}</strong> &mdash; 6 simultaneous
+                translations. The balance that&rsquo;s worked well in practice;
+                the occasional 429 is retried with backoff.
+              </p>
+              <p>
+                <strong>{t('speed.fast')}</strong> &mdash; 12 simultaneous
+                translations. Often faster, but Google may start returning 429
+                (rate limit). The client automatically backs off and retries,
+                so this can end up no faster than Normal &mdash; sometimes
+                slower &mdash; on long books.
+              </p>
+            </HelpTip>
+          </label>
+          <div className="segmented" role="tablist" aria-label={t('speed.label')}>
+            <button
+              type="button"
+              className={speed === 'slow' ? 'active' : ''}
+              onClick={() => setSpeed('slow')}
+              disabled={phase === 'translating'}
+            >
+              {t('speed.slow')}
+            </button>
+            <button
+              type="button"
+              className={speed === 'normal' ? 'active' : ''}
+              onClick={() => setSpeed('normal')}
+              disabled={phase === 'translating'}
+            >
+              {t('speed.normal')}
+            </button>
+            <button
+              type="button"
+              className={speed === 'fast' ? 'active' : ''}
+              onClick={() => setSpeed('fast')}
+              disabled={phase === 'translating'}
+            >
+              {t('speed.fast')}
+            </button>
+          </div>
 
-      <label className="field-label">
-        Speed
-        <HelpTip>
-          <p>
-            <strong>Slow</strong> &mdash; 2 simultaneous translations. Easiest
-            on Google&rsquo;s free endpoint and never trips its rate limit,
-            but takes the longest for big books.
-          </p>
-          <p>
-            <strong>Normal</strong> &mdash; 6 simultaneous translations. The
-            balance that&rsquo;s worked well in practice; the occasional
-            429 is retried with backoff.
-          </p>
-          <p>
-            <strong>Fast</strong> &mdash; 12 simultaneous translations. Often
-            faster, but Google may start returning 429 (rate limit). The
-            client automatically backs off and retries, so this can end up
-            no faster than Normal &mdash; sometimes slower &mdash; on long
-            books.
-          </p>
-        </HelpTip>
-      </label>
-      <div className="segmented" role="tablist" aria-label="Translation speed">
-        <button
-          type="button"
-          className={speed === 'slow' ? 'active' : ''}
-          onClick={() => setSpeed('slow')}
-          disabled={phase === 'translating'}
-          title="2 simultaneous translations. Safest, slowest."
-        >
-          Slow
-        </button>
-        <button
-          type="button"
-          className={speed === 'normal' ? 'active' : ''}
-          onClick={() => setSpeed('normal')}
-          disabled={phase === 'translating'}
-          title="6 simultaneous translations. Default, balanced."
-        >
-          Normal
-        </button>
-        <button
-          type="button"
-          className={speed === 'fast' ? 'active' : ''}
-          onClick={() => setSpeed('fast')}
-          disabled={phase === 'translating'}
-          title="12 simultaneous translations. Risk of rate-limit retries."
-        >
-          Fast
-        </button>
-      </div>
-
-      <label className="field-label">
-        Line breaks (&lt;br&gt;)
-        <HelpTip>
-          <p>
-            <strong>Preserve</strong> &mdash; treat each <code>&lt;br&gt;</code>
-            -separated line as its own translation pair. Good for poetry,
-            slogans, or any text where the line breaks carry meaning.
-          </p>
-          <p>
-            <strong>Collapse</strong> &mdash; ignore <code>&lt;br&gt;</code>{' '}
-            inside paragraphs; the whole paragraph becomes one chunk. Useful
-            for EPUBs that use <code>&lt;br&gt;</code> for visual line-wrap
-            inside what is logically one paragraph.
-          </p>
-        </HelpTip>
-      </label>
-      <div className="segmented" role="tablist" aria-label="Line break handling">
-        <button
-          type="button"
-          className={!collapseBreaks ? 'active' : ''}
-          onClick={() => setCollapseBreaks(false)}
-          disabled={phase === 'translating'}
-          title="Treat each <br>-separated line as its own translation pair."
-        >
-          Preserve
-        </button>
-        <button
-          type="button"
-          className={collapseBreaks ? 'active' : ''}
-          onClick={() => setCollapseBreaks(true)}
-          disabled={phase === 'translating'}
-          title="Ignore <br> tags inside paragraphs; the whole paragraph is one chunk."
-        >
-          Collapse
-        </button>
-      </div>
-
+          <label className="field-label">
+            {t('breaks.label')}
+            <HelpTip>
+              <p>
+                <strong>{t('breaks.preserve')}</strong> &mdash; treat each{' '}
+                <code>&lt;br&gt;</code>-separated line as its own translation
+                pair. Good for poetry, slogans, or any text where the line
+                breaks carry meaning.
+              </p>
+              <p>
+                <strong>{t('breaks.collapse')}</strong> &mdash; ignore{' '}
+                <code>&lt;br&gt;</code> inside paragraphs; the whole paragraph
+                becomes one chunk. Useful for EPUBs that use{' '}
+                <code>&lt;br&gt;</code> for visual line-wrap inside what is
+                logically one paragraph.
+              </p>
+            </HelpTip>
+          </label>
+          <div
+            className="segmented"
+            role="tablist"
+            aria-label={t('breaks.label')}
+          >
+            <button
+              type="button"
+              className={!collapseBreaks ? 'active' : ''}
+              onClick={() => setCollapseBreaks(false)}
+              disabled={phase === 'translating'}
+            >
+              {t('breaks.preserve')}
+            </button>
+            <button
+              type="button"
+              className={collapseBreaks ? 'active' : ''}
+              onClick={() => setCollapseBreaks(true)}
+              disabled={phase === 'translating'}
+            >
+              {t('breaks.collapse')}
+            </button>
+          </div>
         </div>
       </details>
 
       <div className="lang-row">
         <div>
           <label className="field-label" htmlFor="epub-sl">
-            Source language
+            {t('common.sourceLanguage')}
           </label>
-          <LanguageInput id="epub-sl" value={sl} onChange={setSl} placeholder="e.g. en" />
+          <LanguageInput
+            id="epub-sl"
+            value={sl}
+            onChange={setSl}
+            placeholder={t('epub.langPlaceholderEn')}
+          />
         </div>
         <div>
           <label className="field-label" htmlFor="epub-tl">
-            Target language
+            {t('common.targetLanguage')}
           </label>
-          <LanguageInput id="epub-tl" value={tl} onChange={setTl} placeholder="e.g. fr" />
+          <LanguageInput
+            id="epub-tl"
+            value={tl}
+            onChange={setTl}
+            placeholder={t('epub.langPlaceholderFr')}
+          />
         </div>
       </div>
 
       <label className="field-label" htmlFor="epub-title">
-        Book title (override)
+        {t('epub.titleOverride')}
       </label>
       <textarea
         id="epub-title"
         className="book-title-input"
         value={titleOverride}
         onChange={(e) => setTitleOverride(e.target.value)}
-        placeholder="Leave blank to keep the original title"
+        placeholder={t('epub.titleOverridePlaceholder')}
       />
 
       <div className="actions">
@@ -428,11 +463,11 @@ export function EpubTab({
           onClick={onConvert}
           disabled={!parsed || phase === 'translating'}
         >
-          Convert EPUB
+          {t('common.convertEpub')}
         </button>
         {phase === 'translating' && (
           <button type="button" className="cs-btn btn-secondary" onClick={onCancel}>
-            Cancel
+            {t('common.cancel')}
           </button>
         )}
       </div>
@@ -440,7 +475,7 @@ export function EpubTab({
       {phase === 'translating' && progress.total > 0 && (
         <div className="epub-progress" style={{ marginTop: 18 }}>
           <div className="progress-row">
-            <span>Translating…</span>
+            <span>{t('common.translating')}</span>
             <span>
               {progress.done} / {progress.total}
             </span>

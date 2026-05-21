@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from '@/auth-client';
+import { useT } from '@/i18n/I18nProvider';
 
 export function SignInForm({ googleEnabled }: { googleEnabled: boolean }) {
   const router = useRouter();
+  const { t } = useT();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +20,7 @@ export function SignInForm({ googleEnabled }: { googleEnabled: boolean }) {
     try {
       const result = await signIn.email({ email, password });
       if (result.error) {
-        setError(result.error.message ?? 'Sign in failed');
+        setError(result.error.message ?? t('auth.signIn.failed'));
       } else {
         router.push('/dashboard');
         router.refresh();
@@ -42,7 +44,7 @@ export function SignInForm({ googleEnabled }: { googleEnabled: boolean }) {
 
   return (
     <form onSubmit={onSubmit} className="auth-form">
-      <h1 className="text-2xl font-bold mb-4">Sign in</h1>
+      <h1 className="text-2xl font-bold mb-4">{t('auth.signIn.title')}</h1>
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-800 px-3 py-2 rounded mb-3 text-sm">
@@ -50,7 +52,7 @@ export function SignInForm({ googleEnabled }: { googleEnabled: boolean }) {
         </div>
       )}
 
-      <label className="block text-sm font-semibold mb-1">Email</label>
+      <label className="block text-sm font-semibold mb-1">{t('common.email')}</label>
       <input
         type="email"
         required
@@ -59,7 +61,7 @@ export function SignInForm({ googleEnabled }: { googleEnabled: boolean }) {
         className="w-full border rounded px-3 py-2 mb-3"
       />
 
-      <label className="block text-sm font-semibold mb-1">Password</label>
+      <label className="block text-sm font-semibold mb-1">{t('common.password')}</label>
       <input
         type="password"
         required
@@ -73,27 +75,29 @@ export function SignInForm({ googleEnabled }: { googleEnabled: boolean }) {
         disabled={busy}
         className="w-full bg-[color:var(--accent)] text-white font-semibold py-2 rounded disabled:opacity-50"
       >
-        {busy ? 'Signing in…' : 'Sign in'}
+        {busy ? t('auth.signIn.submitting') : t('auth.signIn.submit')}
       </button>
 
       {googleEnabled && (
         <>
-          <div className="text-center text-sm text-[color:var(--muted)] my-3">or</div>
+          <div className="text-center text-sm text-[color:var(--muted)] my-3">
+            {t('common.or')}
+          </div>
           <button
             type="button"
             onClick={onGoogle}
             disabled={busy}
             className="w-full border border-[color:var(--border)] py-2 rounded font-semibold disabled:opacity-50"
           >
-            Continue with Google
+            {t('auth.signIn.continueGoogle')}
           </button>
         </>
       )}
 
       <p className="text-sm text-[color:var(--muted)] mt-4 text-center">
-        New here?{' '}
+        {t('auth.signIn.newHere')}{' '}
         <a href="/sign-up" className="text-[color:var(--accent)] font-semibold">
-          Create an account
+          {t('auth.signIn.createAccount')}
         </a>
       </p>
     </form>

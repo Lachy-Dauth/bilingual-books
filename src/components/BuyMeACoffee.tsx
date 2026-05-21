@@ -1,12 +1,18 @@
+'use client';
+
 import clsx from 'clsx';
+import { useT } from '@/i18n/I18nProvider';
 
 export function BuyMeACoffee({
   className,
-  label = 'Buy me a coffee',
+  labelKey,
 }: {
   className?: string;
-  label?: string;
+  /** Optional translation key override (e.g. 'common.thanksBmc'). */
+  labelKey?: 'common.buyMeACoffee' | 'common.thanksBmc';
 }) {
+  const { t } = useT();
+  const label = t(labelKey ?? 'common.buyMeACoffee');
   return (
     <a
       href="https://www.buymeacoffee.com/lachydauth"

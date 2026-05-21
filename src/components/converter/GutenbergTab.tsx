@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import { searchBooks, type GutendexBook } from '@/lib/gutenberg';
+import { useT } from '@/i18n/I18nProvider';
 import { EpubTab } from './EpubTab';
 import { GutenbergResultsList } from './GutenbergResultsList';
 import { useGutenbergPicker } from './useGutenbergPicker';
 
 export function GutenbergTab() {
+  const { t } = useT();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<GutendexBook[]>([]);
   const [searching, setSearching] = useState(false);
@@ -35,22 +37,18 @@ export function GutenbergTab() {
       <form onSubmit={onSearch} style={{ display: 'flex', gap: 8 }}>
         <input
           type="text"
-          placeholder="Search title or author…"
+          placeholder={t('gutenberg.searchPlaceholder')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           style={{ flex: 1 }}
         />
         <button type="submit" className="cs-btn" disabled={searching || !query.trim()}>
-          {searching ? 'Searching…' : 'Search'}
+          {searching ? t('common.searching') : t('common.search')}
         </button>
       </form>
 
       <p className="field-hint" style={{ marginTop: 10 }}>
-        Searches{' '}
-        <a href="https://www.gutenberg.org" target="_blank" rel="noopener">
-          Project Gutenberg
-        </a>{' '}
-        via gutendex. EPUB is preferred when available.
+        {t('gutenberg.searchHint')}
       </p>
 
       {(searchErr || error) && (

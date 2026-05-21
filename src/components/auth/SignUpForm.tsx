@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn, signUp } from '@/auth-client';
+import { useT } from '@/i18n/I18nProvider';
 
 export function SignUpForm({ googleEnabled }: { googleEnabled: boolean }) {
   const router = useRouter();
+  const { t } = useT();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,7 +21,7 @@ export function SignUpForm({ googleEnabled }: { googleEnabled: boolean }) {
     try {
       const result = await signUp.email({ email, password, name: name || email });
       if (result.error) {
-        setError(result.error.message ?? 'Sign up failed');
+        setError(result.error.message ?? t('auth.signUp.failed'));
       } else {
         router.push('/dashboard');
         router.refresh();
@@ -43,7 +45,7 @@ export function SignUpForm({ googleEnabled }: { googleEnabled: boolean }) {
 
   return (
     <form onSubmit={onSubmit} className="auth-form">
-      <h1 className="text-2xl font-bold mb-4">Create account</h1>
+      <h1 className="text-2xl font-bold mb-4">{t('auth.signUp.title')}</h1>
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-800 px-3 py-2 rounded mb-3 text-sm">
@@ -51,7 +53,7 @@ export function SignUpForm({ googleEnabled }: { googleEnabled: boolean }) {
         </div>
       )}
 
-      <label className="block text-sm font-semibold mb-1">Name (optional)</label>
+      <label className="block text-sm font-semibold mb-1">{t('auth.signUp.name')}</label>
       <input
         type="text"
         value={name}
@@ -59,7 +61,7 @@ export function SignUpForm({ googleEnabled }: { googleEnabled: boolean }) {
         className="w-full border rounded px-3 py-2 mb-3"
       />
 
-      <label className="block text-sm font-semibold mb-1">Email</label>
+      <label className="block text-sm font-semibold mb-1">{t('common.email')}</label>
       <input
         type="email"
         required
@@ -68,7 +70,7 @@ export function SignUpForm({ googleEnabled }: { googleEnabled: boolean }) {
         className="w-full border rounded px-3 py-2 mb-3"
       />
 
-      <label className="block text-sm font-semibold mb-1">Password</label>
+      <label className="block text-sm font-semibold mb-1">{t('common.password')}</label>
       <input
         type="password"
         required
@@ -83,27 +85,29 @@ export function SignUpForm({ googleEnabled }: { googleEnabled: boolean }) {
         disabled={busy}
         className="w-full bg-[color:var(--accent)] text-white font-semibold py-2 rounded disabled:opacity-50"
       >
-        {busy ? 'Creating…' : 'Create account'}
+        {busy ? t('auth.signUp.submitting') : t('auth.signUp.submit')}
       </button>
 
       {googleEnabled && (
         <>
-          <div className="text-center text-sm text-[color:var(--muted)] my-3">or</div>
+          <div className="text-center text-sm text-[color:var(--muted)] my-3">
+            {t('common.or')}
+          </div>
           <button
             type="button"
             onClick={onGoogle}
             disabled={busy}
             className="w-full border border-[color:var(--border)] py-2 rounded font-semibold disabled:opacity-50"
           >
-            Continue with Google
+            {t('auth.signIn.continueGoogle')}
           </button>
         </>
       )}
 
       <p className="text-sm text-[color:var(--muted)] mt-4 text-center">
-        Already have an account?{' '}
+        {t('auth.signUp.haveAccount')}{' '}
         <a href="/sign-in" className="text-[color:var(--accent)] font-semibold">
-          Sign in
+          {t('auth.signIn.title')}
         </a>
       </p>
     </form>

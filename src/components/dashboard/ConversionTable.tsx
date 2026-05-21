@@ -1,9 +1,13 @@
+'use client';
+
 import type { Conversion } from '@prisma/client';
+import { useT } from '@/i18n/I18nProvider';
 
 export function ConversionTable({ rows }: { rows: Conversion[] }) {
+  const { t } = useT();
   if (!rows.length) {
     return (
-      <p className="text-[color:var(--muted)] py-6 text-center">No conversions yet.</p>
+      <p className="text-[color:var(--muted)] py-6 text-center">{t('table.empty')}</p>
     );
   }
   return (
@@ -11,12 +15,12 @@ export function ConversionTable({ rows }: { rows: Conversion[] }) {
       <table className="w-full text-sm">
         <thead>
           <tr className="text-left border-b border-[color:var(--border)] text-[color:var(--muted)]">
-            <th className="py-2 pr-2">When</th>
-            <th className="py-2 pr-2">Title</th>
-            <th className="py-2 pr-2">Languages</th>
-            <th className="py-2 pr-2 text-right">Words</th>
-            <th className="py-2 pr-2">Source</th>
-            <th className="py-2 pr-2">Status</th>
+            <th className="py-2 pr-2">{t('table.when')}</th>
+            <th className="py-2 pr-2">{t('table.title')}</th>
+            <th className="py-2 pr-2">{t('table.languages')}</th>
+            <th className="py-2 pr-2 text-right">{t('table.words')}</th>
+            <th className="py-2 pr-2">{t('table.source')}</th>
+            <th className="py-2 pr-2">{t('table.status')}</th>
           </tr>
         </thead>
         <tbody>

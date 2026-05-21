@@ -9,11 +9,13 @@ import { countWords } from '@/lib/converter/util';
 import type { SentencePair } from '@/lib/converter/types';
 import { logConversion, precheck } from '@/lib/client/api';
 import { BuyMeACoffee } from '@/components/BuyMeACoffee';
+import { useT } from '@/i18n/I18nProvider';
 import { DownloadBar } from './DownloadBar';
 import { LanguageInput } from './LanguageInput';
 import { SaveAsPdfButton } from './SaveAsPdfButton';
 
 export function PasteTab() {
+  const { t } = useT();
   const [sl, setSl] = useState('');
   const [tl, setTl] = useState('');
   const [bookTitle, setBookTitle] = useState('');
@@ -37,14 +39,22 @@ export function PasteTab() {
     if (!pre.allowed) {
       setLimitMsg(
         pre.reason === 'monthly-word-limit-exceeded'
-          ? `Monthly limit reached: ${pre.used}/${pre.limit} words on plan ${pre.plan}. Upgrade to convert more this month.`
-          : `Conversion blocked: ${pre.reason ?? 'unknown'}`,
+          ? t('limit.exceeded', {
+              used: pre.used,
+              limit: pre.limit ?? 0,
+              plan: pre.plan,
+            })
+          : t('limit.blocked', { reason: pre.reason ?? 'unknown' }),
       );
       return;
     }
     if (pre.limit && pre.remaining !== null) {
       setLimitMsg(
-        `${pre.used.toLocaleString()} of ${pre.limit.toLocaleString()} words used this month (${pre.plan} plan).`,
+        t('limit.usage', {
+          used: pre.used.toLocaleString(),
+          limit: pre.limit.toLocaleString(),
+          plan: pre.plan,
+        }),
       );
     }
 
@@ -117,13 +127,13 @@ export function PasteTab() {
       {done && (
         <DownloadBar>
           <button type="button" className="cs-btn" onClick={onDownload}>
-            Download EPUB
+            {t('common.download')}
           </button>
           <SaveAsPdfButton />
           <button type="button" className="cs-btn btn-secondary" onClick={onReset}>
-            Start over
+            {t('common.startOver')}
           </button>
-          <BuyMeACoffee label="Liked it? Buy me a coffee" />
+          <BuyMeACoffee labelKey="common.thanksBmc" />
         </DownloadBar>
       )}
 
@@ -136,39 +146,49 @@ export function PasteTab() {
       <div className="lang-row">
         <div>
           <label className="field-label" htmlFor="paste-sl">
-            Source language
+            {t('common.sourceLanguage')}
           </label>
-          <LanguageInput id="paste-sl" value={sl} onChange={setSl} placeholder="e.g. fr" />
+          <LanguageInput
+            id="paste-sl"
+            value={sl}
+            onChange={setSl}
+            placeholder={t('paste.sourceLangPlaceholder')}
+          />
         </div>
         <div>
           <label className="field-label" htmlFor="paste-tl">
-            Target language
+            {t('common.targetLanguage')}
           </label>
-          <LanguageInput id="paste-tl" value={tl} onChange={setTl} placeholder="e.g. en" />
+          <LanguageInput
+            id="paste-tl"
+            value={tl}
+            onChange={setTl}
+            placeholder={t('paste.targetLangPlaceholder')}
+          />
         </div>
       </div>
 
       <label className="field-label" htmlFor="paste-title">
-        Book title
+        {t('common.bookTitle')}
       </label>
       <textarea
         id="paste-title"
         className="book-title-input"
         value={bookTitle}
         onChange={(e) => setBookTitle(e.target.value)}
-        placeholder="My Bilingual Book"
+        placeholder={t('paste.bookTitlePlaceholder')}
       />
 
       <label className="field-label" htmlFor="paste-source">
-        Source text
+        {t('paste.sourceText')}
       </label>
-      <p className="field-hint">Text is split at full stops, one pair per sentence.</p>
+      <p className="field-hint">{t('paste.sourceTextHint')}</p>
       <textarea
         id="paste-source"
         className="source-text"
         value={sourceText}
         onChange={(e) => setSourceText(e.target.value)}
-        placeholder="Enter your source text here..."
+        placeholder={t('paste.sourceTextPlaceholder')}
       />
 
       <div className="actions">
@@ -178,18 +198,18 @@ export function PasteTab() {
           onClick={onGenerate}
           disabled={busy || !sourceText.trim()}
         >
-          {busy ? 'Translating…' : 'Generate Book'}
+          {busy ? t('common.translating') : t('common.generate')}
         </button>
         {busy && (
           <button type="button" className="cs-btn btn-secondary" onClick={onCancel}>
-            Cancel
+            {t('common.cancel')}
           </button>
         )}
       </div>
 
       {cancelled && done && (
         <p className="field-hint" style={{ color: 'var(--accent)' }}>
-          Cancelled. Showing partial translation.
+          {t('paste.cancelled')}
         </p>
       )}
 

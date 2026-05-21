@@ -2,8 +2,10 @@
 
 import { useState, useTransition } from 'react';
 import { deleteOwnAccount } from '@/app/dashboard/actions';
+import { useT } from '@/i18n/I18nProvider';
 
 export function DeleteAccountButton() {
+  const { t } = useT();
   const [confirming, setConfirming] = useState(false);
   const [pending, start] = useTransition();
   const [err, setErr] = useState<string | null>(null);
@@ -15,19 +17,15 @@ export function DeleteAccountButton() {
         onClick={() => setConfirming(true)}
         className="text-sm font-semibold text-red-700 underline-offset-2 hover:underline"
       >
-        Delete account
+        {t('delete.button')}
       </button>
     );
   }
 
   return (
     <div className="border border-red-300 bg-red-50 rounded p-4 text-sm">
-      <p className="font-semibold mb-1">Delete your account?</p>
-      <p className="text-[color:var(--muted)] mb-3">
-        This is permanent. Your user record, sessions, and OAuth links are
-        removed. Past conversions stay in aggregate stats but are no longer
-        linked to you.
-      </p>
+      <p className="font-semibold mb-1">{t('delete.confirmTitle')}</p>
+      <p className="text-[color:var(--muted)] mb-3">{t('delete.confirmBody')}</p>
       {err && (
         <p className="text-red-700 mb-2" role="alert">
           {err}
@@ -40,7 +38,7 @@ export function DeleteAccountButton() {
           disabled={pending}
           className="px-3 py-1.5 border border-[color:var(--border)] rounded font-semibold"
         >
-          Cancel
+          {t('common.cancel')}
         </button>
         <button
           type="button"
@@ -56,7 +54,7 @@ export function DeleteAccountButton() {
           disabled={pending}
           className="px-3 py-1.5 bg-red-600 text-white rounded font-semibold disabled:opacity-50"
         >
-          {pending ? 'Deleting…' : 'Yes, delete my account'}
+          {pending ? t('delete.deleting') : t('delete.confirmYes')}
         </button>
       </div>
     </div>

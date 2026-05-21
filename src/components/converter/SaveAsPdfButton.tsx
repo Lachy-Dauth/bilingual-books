@@ -1,6 +1,9 @@
 'use client';
 
+import { useT } from '@/i18n/I18nProvider';
+
 export function SaveAsPdfButton() {
+  const { t } = useT();
   return (
     <button
       type="button"
@@ -8,7 +11,7 @@ export function SaveAsPdfButton() {
       onClick={() => window.print()}
       title="Open your browser's print dialog. Pick 'Save as PDF' as the destination."
     >
-      Save as PDF
+      {t('common.saveAsPdf')}
     </button>
   );
 }

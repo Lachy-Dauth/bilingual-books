@@ -17,7 +17,7 @@ const STORAGE_KEY = 'bb_locale';
 type Ctx = {
   locale: Locale;
   setLocale: (l: Locale) => void;
-  t: (key: TKey) => string;
+  t: (key: TKey, vars?: Record<string, string | number>) => string;
 };
 
 const I18nCtx = createContext<Ctx | null>(null);
@@ -50,8 +50,12 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const t = useCallback(
-    (key: TKey): string => {
-      return MESSAGES[locale]?.[key] ?? MESSAGES.en[key] ?? key;
+    (key: TKey, vars?: Record<string, string | number>): string => {
+      const template = MESSAGES[locale]?.[key] ?? MESSAGES.en[key] ?? key;
+      if (!vars) return template;
+      return template.replace(/\{(\w+)\}/g, (_match, k: string) =>
+        k in vars ? String(vars[k]) : `{${k}}`,
+      );
     },
     [locale],
   );
