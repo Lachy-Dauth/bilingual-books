@@ -1,0 +1,1130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: rgb(255, 234, 203);
+  --surface: rgb(255, 246, 230);
+  --text: rgb(53, 39, 0);
+  --muted: rgb(120, 92, 40);
+  --accent: rgb(140, 82, 20);
+  --accent-hover: rgb(110, 62, 10);
+  --border: rgba(53, 39, 0, 0.15);
+  --radius: 8px;
+  --shadow: 0 2px 8px rgba(53, 39, 0, 0.08);
+}
+
+html.theme-light {
+  --bg: #ffffff;
+  --surface: #f7f7f7;
+  --text: #111111;
+  --muted: #555555;
+  --accent: #222222;
+  --accent-hover: #000000;
+  --border: rgba(0, 0, 0, 0.15);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+html.theme-dark {
+  --bg: #0f1115;
+  --surface: #1b1e25;
+  --text: #e6e6e6;
+  --muted: #9aa0aa;
+  --accent: rgb(214, 156, 86);
+  --accent-hover: rgb(232, 178, 112);
+  --border: rgba(255, 255, 255, 0.12);
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+}
+html.theme-dark body {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.5;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* ============================================================
+   Legacy converter styles — scoped under .converter-shell so
+   they don't leak into Tailwind-styled dashboard / admin pages.
+   ============================================================ */
+
+.converter-shell {
+  color: var(--text);
+}
+
+.converter-shell .container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+}
+
+.converter-shell header.cs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.converter-shell h1 {
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.converter-shell h2 {
+  font-size: 1.15rem;
+  margin-top: 1rem;
+  margin-bottom: 0.35rem;
+}
+
+.converter-shell h3 {
+  font-size: 1rem;
+  margin: 18px 0 6px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.converter-shell label.field-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.converter-shell .lang-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.converter-shell .lang-row > div {
+  flex: 1;
+}
+
+.converter-shell .segmented {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 2px;
+  gap: 2px;
+  margin-bottom: 14px;
+}
+.converter-shell .segmented button {
+  background: transparent;
+  border: none;
+  padding: 6px 14px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--muted);
+  border-radius: calc(var(--radius) - 2px);
+  cursor: pointer;
+}
+.converter-shell .segmented button.active {
+  background: var(--accent);
+  color: #fff;
+}
+.converter-shell .segmented button:not(.active):hover {
+  color: var(--accent);
+}
+
+/* Collapsible advanced section */
+.converter-shell .advanced {
+  margin: 6px 0 14px;
+}
+.converter-shell .advanced > summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 6px 0;
+  user-select: none;
+}
+.converter-shell .advanced > summary::-webkit-details-marker {
+  display: none;
+}
+.converter-shell .advanced > summary::after {
+  content: '\25be'; /* ▾ */
+  font-size: 0.9rem;
+  margin-left: 2px;
+  transition: transform 0.15s;
+}
+.converter-shell .advanced[open] > summary::after {
+  transform: rotate(180deg);
+}
+.converter-shell .advanced > summary:hover {
+  color: var(--accent);
+}
+.converter-shell .advanced-content {
+  padding: 10px 0 0;
+  border-top: 1px dashed var(--border);
+  margin-top: 4px;
+}
+
+/* Help icon next to a field label, with hover/focus tooltip */
+.converter-shell .help-tip {
+  position: relative;
+  display: inline-block;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.converter-shell .help-tip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: serif;
+  cursor: help;
+  user-select: none;
+}
+.converter-shell .help-tip-icon:hover,
+.converter-shell .help-tip:focus-within .help-tip-icon {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.converter-shell .help-tip-panel {
+  position: absolute;
+  display: none;
+  top: 24px;
+  left: -8px;
+  width: 340px;
+  max-width: 90vw;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  box-shadow: var(--shadow);
+  z-index: 20;
+  font-size: 0.85rem;
+  color: var(--text);
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+  line-height: 1.45;
+}
+.converter-shell .help-tip:hover .help-tip-panel,
+.converter-shell .help-tip:focus-within .help-tip-panel {
+  display: block;
+}
+.converter-shell .help-tip-panel p {
+  margin: 0 0 8px;
+}
+.converter-shell .help-tip-panel p:last-child {
+  margin-bottom: 0;
+}
+.converter-shell .help-tip-panel strong {
+  color: var(--accent);
+}
+
+.converter-shell textarea,
+.converter-shell input[type='text'] {
+  width: 100%;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  resize: vertical;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.converter-shell textarea:focus,
+.converter-shell input[type='text']:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(140, 82, 20, 0.18);
+}
+html.theme-light .converter-shell textarea:focus,
+html.theme-light .converter-shell input[type='text']:focus {
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.15);
+}
+
+.converter-shell .lang-row textarea,
+.converter-shell .lang-row input[type='text'] {
+  height: 44px;
+  resize: none;
+}
+
+/* ===== Language combobox ===== */
+.converter-shell .lang-combo {
+  position: relative;
+  width: 100%;
+}
+.converter-shell .lang-combo > input {
+  width: 100%;
+  padding-right: 30px;
+}
+.converter-shell .lang-combo-chevron {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+  font-size: 0.8rem;
+  transition: transform 0.15s;
+}
+.converter-shell .lang-combo:focus-within .lang-combo-chevron {
+  color: var(--accent);
+  transform: translateY(-50%) rotate(180deg);
+}
+.converter-shell .lang-combo-pill {
+  position: absolute;
+  top: 50%;
+  right: 28px;
+  transform: translateY(-50%);
+  background: rgba(140, 82, 20, 0.1);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  pointer-events: none;
+  max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+html.theme-light .converter-shell .lang-combo-pill {
+  background: rgba(0, 0, 0, 0.08);
+}
+.converter-shell .lang-combo-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 4px;
+  scrollbar-width: thin;
+}
+.converter-shell .lang-combo-list::-webkit-scrollbar {
+  width: 8px;
+}
+.converter-shell .lang-combo-list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+.converter-shell .lang-combo-option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: calc(var(--radius) - 2px);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: var(--text);
+}
+.converter-shell .lang-combo-option.highlight {
+  background: var(--accent);
+  color: #fff;
+}
+.converter-shell .lang-combo-option:active {
+  transform: translateY(0.5px);
+}
+.converter-shell .lang-combo-name {
+  font-weight: 500;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.converter-shell .lang-combo-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+.converter-shell .lang-combo-option.highlight .lang-combo-code {
+  color: rgba(255, 255, 255, 0.85);
+}
+.converter-shell .lang-combo-empty {
+  padding: 12px 10px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+.converter-shell .book-title-input {
+  height: 44px;
+  resize: none;
+  margin-bottom: 14px;
+}
+.converter-shell #source-text,
+.converter-shell .source-text {
+  height: 220px;
+}
+
+.converter-shell .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.converter-shell button.cs-btn {
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 10px 18px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: #fff;
+  transition:
+    background 0.15s,
+    transform 0.05s,
+    box-shadow 0.15s;
+}
+.converter-shell button.cs-btn:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+.converter-shell button.cs-btn:active {
+  transform: translateY(1px);
+}
+.converter-shell button.cs-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.converter-shell button.cs-btn.btn-secondary {
+  background: transparent;
+  color: var(--accent);
+}
+.converter-shell button.cs-btn.btn-secondary:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.converter-shell .icon-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--muted);
+}
+.converter-shell .icon-btn:hover {
+  color: var(--accent);
+}
+
+.converter-shell .tabs {
+  display: flex;
+  gap: 4px;
+  margin: 0 0 18px;
+  border-bottom: 1px solid var(--border);
+}
+.converter-shell .tab-btn {
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  border-radius: 0;
+  padding: 10px 16px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.converter-shell .tab-btn:hover {
+  color: var(--accent);
+}
+.converter-shell .tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.converter-shell input[type='file'] {
+  width: 100%;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 14px 12px;
+  cursor: pointer;
+  margin-bottom: 14px;
+}
+.converter-shell input[type='file']:hover {
+  border-color: var(--accent);
+}
+
+.converter-shell .field-hint,
+.converter-shell .epub-status {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+.converter-shell .epub-status.error {
+  color: #b22;
+}
+
+.converter-shell .epub-info {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 0.9rem;
+}
+.converter-shell .epub-info .info-row {
+  display: flex;
+  gap: 12px;
+  padding: 3px 0;
+}
+.converter-shell .epub-info .info-key {
+  flex: 0 0 160px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.converter-shell .epub-info .info-val {
+  flex: 1;
+  word-break: break-word;
+}
+
+.converter-shell .paragraph {
+  display: flex;
+  gap: 16px;
+  padding: 4px 20px;
+}
+.converter-shell .paragraph.paragraph-end {
+  padding-bottom: 18px;
+}
+.converter-shell .paragraph.paragraph-end + .paragraph {
+  padding-top: 10px;
+}
+.converter-shell .paragraph.is-heading .source,
+.converter-shell .paragraph.is-heading .english {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+.converter-shell .source,
+.converter-shell .english {
+  flex: 1;
+}
+.converter-shell .rtl {
+  text-align: right;
+  direction: rtl;
+}
+
+.converter-shell .chapter {
+  margin: 24px 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.converter-shell .chapter:first-child {
+  border-top: none;
+}
+.converter-shell .chapter-title-display {
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 8px 20px 16px;
+  margin: 0;
+}
+
+.converter-shell .book-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.converter-shell .download-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  margin: -28px -20px 18px;
+  padding: 12px 20px;
+  box-shadow: var(--shadow);
+}
+.converter-shell .download-bar-inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.converter-shell .epub-progress {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.converter-shell .epub-progress .progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.converter-shell .epub-progress .progress-row > span:first-child {
+  flex: 1;
+  color: var(--text);
+  font-weight: 600;
+}
+.converter-shell .progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.converter-shell .progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.2s ease;
+}
+
+.converter-shell .gutenberg-results {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+.converter-shell .gutenberg-card {
+  display: flex;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  align-items: flex-start;
+}
+.converter-shell .gutenberg-card:hover {
+  border-color: var(--accent);
+}
+.converter-shell .gutenberg-card .cover {
+  width: 60px;
+  height: 90px;
+  object-fit: cover;
+  background: #eee;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.converter-shell .gutenberg-card .meta {
+  flex: 1;
+  min-width: 0;
+}
+.converter-shell .gutenberg-card .title {
+  font-weight: 600;
+  margin: 0 0 2px;
+}
+.converter-shell .gutenberg-card .author,
+.converter-shell .gutenberg-card .langs {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0;
+}
+.converter-shell .gutenberg-card button {
+  align-self: center;
+}
+
+.converter-shell .info-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 4vh 16px;
+}
+.converter-shell .info-modal .info-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 24px 28px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+
+@media (max-width: 600px) {
+  .converter-shell .container {
+    padding: 18px 14px 40px;
+  }
+  .converter-shell h1 {
+    font-size: 1.5rem;
+  }
+  .converter-shell .lang-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .converter-shell .paragraph {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .converter-shell .epub-info .info-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  .converter-shell .epub-info .info-key {
+    flex-basis: auto;
+  }
+}
+
+/* ============================================================
+   Site nav (used on every page)
+   ============================================================ */
+
+.site-nav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+}
+.site-nav .nav-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.site-nav .nav-brand {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--text);
+}
+.site-nav .nav-links {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  font-size: 0.9rem;
+}
+.site-nav .nav-links a {
+  color: var(--muted);
+}
+.site-nav .nav-links a:hover,
+.site-nav .nav-links a.active {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* Locale switcher in the navbar */
+.locale-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px 6px 2px 10px;
+  background: var(--bg);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  margin-left: 4px;
+}
+.locale-switcher:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.locale-switcher > select {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  padding: 2px 4px 2px 2px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+}
+.locale-switcher > select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+html.theme-dark .locale-switcher > select option {
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* Theme toggle in the navbar */
+.theme-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px;
+  gap: 2px;
+  background: var(--bg);
+  margin-left: 4px;
+}
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 0;
+}
+.theme-toggle-btn:hover {
+  color: var(--accent);
+}
+.theme-toggle-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+html.theme-dark .theme-toggle-btn.active {
+  color: #1b1e25;
+}
+
+/* ============================================================
+   Site footer
+   ============================================================ */
+
+.site-content {
+  flex: 1 0 auto;
+}
+.site-footer {
+  flex-shrink: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 20px;
+  margin-top: 40px;
+}
+.site-footer .footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.site-footer .footer-tagline {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: 0;
+}
+.site-footer .footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  font-size: 0.85rem;
+}
+.site-footer .footer-links a,
+.site-footer .footer-links .footer-link-btn {
+  color: var(--muted);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+}
+.site-footer .footer-links a:hover,
+.site-footer .footer-links .footer-link-btn:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* ===== Cookie consent banner ===== */
+.consent-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+  padding: 14px 16px;
+}
+.consent-banner-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+.consent-banner-text {
+  flex: 1 1 320px;
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text);
+  line-height: 1.45;
+}
+.consent-banner-link {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+}
+.consent-banner-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+}
+.consent-banner-btn {
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  border: 1px solid var(--accent);
+  transition: background 0.15s;
+}
+.consent-banner-btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+.consent-banner-btn-primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+.consent-banner-btn-secondary {
+  background: transparent;
+  color: var(--accent);
+}
+.consent-banner-btn-secondary:hover {
+  background: rgba(140, 82, 20, 0.08);
+}
+html.theme-light .consent-banner-btn-secondary:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* ===== Privacy / terms typography ===== */
+.prose-policy {
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+.prose-policy h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+.prose-policy .meta {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-bottom: 24px;
+}
+.prose-policy h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 28px 0 8px;
+}
+.prose-policy h3 {
+  font-size: 1.02rem;
+  font-weight: 600;
+  margin: 18px 0 4px;
+  color: var(--muted);
+}
+.prose-policy p,
+.prose-policy ul {
+  margin: 0 0 12px;
+}
+.prose-policy ul {
+  padding-left: 22px;
+}
+.prose-policy li {
+  margin-bottom: 6px;
+}
+.prose-policy code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.88em;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+.prose-policy a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* ============================================================
+   Print stylesheet — used by the "Save as PDF" button which calls
+   window.print(). Hides every UI chrome / control, shows only the
+   bilingual output with proper page breaks.
+   ============================================================ */
+@media print {
+  /* Force a clean white background everywhere */
+  html,
+  body,
+  .site-content,
+  .converter-shell,
+  .converter-shell .container {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    min-height: 0 !important;
+  }
+  body {
+    display: block !important;
+  }
+
+  /* Hide every navigation / form / banner element */
+  .site-nav,
+  .site-footer,
+  .consent-banner,
+  .info-modal,
+  .converter-shell .cs-header,
+  .converter-shell .tabs,
+  .converter-shell .lang-row,
+  .converter-shell .lang-combo,
+  .converter-shell .segmented,
+  .converter-shell .field-label,
+  .converter-shell .field-hint,
+  .converter-shell .book-title-input,
+  .converter-shell .epub-info,
+  .converter-shell .epub-status,
+  .converter-shell .epub-progress,
+  .converter-shell .gutenberg-results,
+  .converter-shell .actions,
+  .converter-shell .download-bar,
+  .converter-shell input,
+  .converter-shell textarea {
+    display: none !important;
+  }
+
+  /* Chapter starts on a new page (except the first) */
+  .converter-shell .chapter {
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    page-break-before: always;
+    break-before: page;
+  }
+  .converter-shell .chapter:first-of-type {
+    page-break-before: auto;
+    break-before: auto;
+  }
+
+  .converter-shell .chapter-title-display {
+    text-align: center;
+    font-size: 1.3rem !important;
+    color: #000 !important;
+    text-transform: none;
+    letter-spacing: 0;
+    padding: 0 0 1em !important;
+    margin: 0 !important;
+  }
+
+  /* Each pair becomes a side-by-side table row, never split across pages */
+  .converter-shell .paragraph {
+    display: table !important;
+    width: 100% !important;
+    margin: 0 0 0.4em !important;
+    padding: 0 !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .converter-shell .paragraph .source,
+  .converter-shell .paragraph .english {
+    display: table-cell !important;
+    width: 50% !important;
+    vertical-align: top !important;
+    padding: 0.25em 0.6em !important;
+    flex: none !important;
+  }
+  .converter-shell .paragraph .source {
+    border-right: 1px solid #aaa !important;
+  }
+  .converter-shell .paragraph.paragraph-end {
+    margin-bottom: 1.4em !important;
+    padding-bottom: 0 !important;
+  }
+  .converter-shell .paragraph.is-heading .source,
+  .converter-shell .paragraph.is-heading .english {
+    font-weight: bold !important;
+    font-size: 1.05em !important;
+  }
+
+  @page {
+    margin: 1.5cm 1.25cm;
+  }
+}
+
+/* BMC link works both inside and outside .converter-shell */
+.bmc-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffdd00;
+  color: #000;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #000;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+.bmc-link:hover {
+  opacity: 0.9;
+  text-decoration: none;
+  color: #000;
+}

@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Tier {
+  free
+  pro
+  unlimited
+}
+
+enum Role {
+  user
+  admin
+}
+
+enum ConversionSource {
+  paste
+  epub
+  gutenberg
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  name          String?
+  image         String?
+  role          Role     @default(user)
+  tier          Tier     @default(free)
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  accounts    Account[]
+  sessions    Session[]
+  conversions Conversion[]
+
+  @@index([role])
+  @@index([tier])
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  providerId            String
+  accountId             String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+model Conversion {
+  id          String           @id @default(cuid())
+  userId      String?
+  anonymousId String?
+  bookTitle   String
+  sourceLang  String
+  targetLang  String
+  wordCount   Int
+  source      ConversionSource
+  gutenbergId Int?
+  durationMs  Int?
+  status      String           @default("ok")
+  createdAt   DateTime         @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([anonymousId, createdAt])
+  @@index([source])
+  @@index([sourceLang, targetLang])
+  @@index([gutenbergId])
+}
+
+model BookCache {
+  id          String   @id @default(cuid())
+  gutenbergId Int
+  format      String
+  mimeType    String
+  bytes       Bytes
+  fetchedAt   DateTime @default(now())
+  hits        Int      @default(0)
+
+  @@unique([gutenbergId, format])
+}
