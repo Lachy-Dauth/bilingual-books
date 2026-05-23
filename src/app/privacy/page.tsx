@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — Bilingual Books',
+  title: 'Privacy Policy',
 };
 
 const LAST_UPDATED = '2026-05-20';

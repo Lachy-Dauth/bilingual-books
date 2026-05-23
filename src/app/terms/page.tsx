@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service — Bilingual Books',
+  title: 'Terms of Service',
 };
 
 const LAST_UPDATED = '2026-05-20';
